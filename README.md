@@ -265,6 +265,7 @@ This comprehensive report demonstrates:
 After successful minting, users are presented with an intuitive listing form:
 
 #### **Success Alert:**
+
 - ✅ **Mint Transaction Confirmed** with token ID
 - **Document Type Badge** - Shows the verified document category
 - **Transaction Link** - View on QIE block explorer
@@ -273,6 +274,7 @@ After successful minting, users are presented with an intuitive listing form:
 #### **Step 2: List NFT on Marketplace**
 
 **NFT Display Name:**
+
 - **Auto-generated smart name**: `🏠 Property Deed #5`
   - Combines document icon + document type + token ID
   - Fully customizable by user
@@ -280,11 +282,13 @@ After successful minting, users are presented with an intuitive listing form:
 - Helper text: "This name will be displayed on the marketplace"
 
 **Listing Price:**
+
 - Enter price in ARIA tokens
 - Visual ARIA token label
 - Helper text: "Set your asking price in ARIA tokens"
 
 **List Button:**
+
 - Only enabled when BOTH name AND price are provided
 - Two-step process:
   1. Approve marketplace contract (if needed)
@@ -292,6 +296,7 @@ After successful minting, users are presented with an intuitive listing form:
 - Loading states with clear progress indicators
 
 **User Benefits:**
+
 - 📝 **Custom naming** makes NFTs easily identifiable
 - 🔗 **IPFS transparency** builds buyer trust
 - ⚡ **Quick listing** in 2 clicks
@@ -310,16 +315,19 @@ After successful minting, users are presented with an intuitive listing form:
 Each NFT card now shows comprehensive information:
 
 #### **Card Header:**
+
 - **Token Badge**: #6 (purple)
 - **Status Badge**: "For Sale" (green) or "Your NFT" (yellow)
 
 #### **Visual & Identity:**
+
 - **NFT Image** - Document thumbnail or default image
 - **Custom Name** - `🏠 Property Deed Mumbai Central` (example)
   - Shows the exact name provided by seller
   - Makes listings instantly recognizable
 
 #### **Metadata Access:**
+
 - **IPFS Link** - Clickable "View IPFS Metadata ↗" button
   - Opens full metadata in new tab
   - Displays complete AI analysis report
@@ -327,10 +335,12 @@ Each NFT card now shows comprehensive information:
   - Builds transparency and trust
 
 #### **Description:**
+
 - Brief description from metadata
 - Truncated to 2 lines with ellipsis
 
 #### **Price Display:**
+
 - Large, prominent price box
 - Amount in ARIA tokens
 - Purple accent for visibility
@@ -338,6 +348,7 @@ Each NFT card now shows comprehensive information:
 #### **Action Buttons:**
 
 **For Other Users' NFTs:**
+
 - **"Buy Now"** - Large teal button
   - Enabled if sufficient ARIA balance
   - Shows "Insufficient Balance" if not enough ARIA
@@ -345,14 +356,17 @@ Each NFT card now shows comprehensive information:
 - **"Mint ARIA to Buy"** - Quick access to token minting
 
 **For Your Own NFTs:**
+
 - **"Your Listing"** - Disabled yellow button
 - Prevents accidental self-purchase
 
 #### **Seller Information:**
+
 - Truncated wallet address: `0x1234...5678`
 - Easy to copy/verify
 
 **Why This Matters:**
+
 - **Professional Display** - Looks like a real marketplace
 - **Informed Decisions** - Buyers can verify metadata before purchase
 - **Trust Building** - IPFS links prove authenticity
@@ -419,12 +433,14 @@ Staking transforms ARIA holders into active participants, decentralizing governa
 ### **Enhanced Marketplace Experience**
 
 #### **1. Custom NFT Naming System**
+
 - **Smart Auto-Generation**: Names like `🏠 Property Deed #5` automatically created
 - **Full Customization**: Users can edit before listing
 - **Icon Integration**: Document type icons in names
 - **Fallback Logic**: Default names if document data unavailable
 
 **Technical Implementation:**
+
 ```javascript
 // Auto-generates from: documentIcon + documentName + tokenId
 const defaultName = `${documentIcon} ${documentName} #${tokenId}`;
@@ -432,12 +448,14 @@ const defaultName = `${documentIcon} ${documentName} #${tokenId}`;
 ```
 
 #### **2. IPFS Metadata Transparency**
+
 - **Clickable Links**: Every NFT card has "View IPFS Metadata ↗" button
 - **Direct Access**: Opens full verification report in new tab
 - **Buyer Confidence**: Full transparency before purchase
 - **Immutable Proof**: IPFS ensures data integrity
 
 **What's Visible:**
+
 - Complete AI analysis report
 - All extracted document fields
 - Authenticity markers detected
@@ -445,12 +463,14 @@ const defaultName = `${documentIcon} ${documentName} #${tokenId}`;
 - Confidence and authenticity scores
 
 #### **3. Enhanced Listing Flow**
+
 - **2-Field Form**: Just name + price (streamlined)
 - **Visual Feedback**: Success alerts with IPFS links
 - **Smart Defaults**: Pre-filled names save time
 - **Error Prevention**: Disabled states until ready
 
 **User Journey:**
+
 ```
 Mint NFT → See Success Alert (with IPFS link) 
          → Auto-filled Name (editable) 
@@ -506,24 +526,29 @@ User Buys with ARIA ← Seller Receives ARIA ← 5% Fee → Staking Rewards
 ## 🎨 Marketplace Features
 
 ### **Custom NFT Naming**
+
 Every listed NFT can have a **custom display name** that makes it instantly recognizable:
 
 **Examples:**
+
 - `🏠 Luxury Villa Mumbai Central #42`
 - `🚗 Toyota Camry 2024 Registration #15`
 - `💰 Amazon Invoice August 2025 #8`
 - `🎓 Stanford Computer Science Degree #23`
 
 **Benefits:**
+
 - ✅ **Better Discoverability** - Easy to search and find
 - ✅ **Professional Look** - Marketplace looks polished
 - ✅ **User Control** - Sellers choose their branding
 - ✅ **Smart Defaults** - Auto-generated names save time
 
 ### **IPFS Metadata Transparency**
+
 Every NFT has a **direct link to IPFS metadata**:
 
 **What Users Can View:**
+
 - Complete AI verification report
 - All extracted document data
 - Authenticity markers found
@@ -532,12 +557,14 @@ Every NFT has a **direct link to IPFS metadata**:
 - Confidence scores
 
 **Why It Matters:**
+
 - 🔍 **Full Transparency** - Buyers see exactly what they're getting
 - 🔒 **Immutable Proof** - IPFS ensures data can't be changed
 - 🤝 **Trust Building** - No hidden information
 - ✅ **Due Diligence** - Buyers can verify before purchase
 
 ### **Smart Listing UX**
+
 The listing process is designed for simplicity:
 
 1. **Auto-Generated Names** - Smart defaults based on document type
@@ -617,7 +644,7 @@ The listing process is designed for simplicity:
 - **File Handling**: React Dropzone for drag-and-drop
 - **State Management**: React Hooks (useState, useEffect, useCallback)
 - **Routing**: React Router v6
-- **Enhanced Features**: 
+- **Enhanced Features**:
   - Custom NFT naming system
   - IPFS metadata display
   - Smart default name generation
@@ -865,44 +892,44 @@ Frontend will start on `http://localhost:5173`
 
 #### **Document Type: Invoice**
 
-- [ ] Upload invoice PDF
-- [ ] Select "Invoice" type
-- [ ] Verify extraction: invoice_number, total, date, vendor
-- [ ] Check authenticity markers found
-- [ ] Confirm QR code scanned (if present)
-- [ ] Verify 80%+ authenticity score
-- [ ] Confirm NFT minted with correct token ID
-- [ ] List on marketplace
-- [ ] Purchase with another account
+- [X] Upload invoice PDF
+- [X] Select "Invoice" type
+- [X] Verify extraction: invoice_number, total, date, vendor
+- [X] Check authenticity markers found
+- [X] Confirm QR code scanned (if present)
+- [X] Verify 80%+ authenticity score
+- [X] Confirm NFT minted with correct token ID
+- [X] List on marketplace
+- [X] Purchase with another account
 
 #### **Document Type: Property Deed**
 
-- [ ] Upload property deed
-- [ ] Select "Property Deed" type
-- [ ] Verify extraction: address, owner, value, date
-- [ ] Check for government seals/stamps
-- [ ] Confirm data accuracy
-- [ ] Mint and list
+- [X] Upload property deed
+- [X] Select "Property Deed" type
+- [X] Verify extraction: address, owner, value, date
+- [X] Check for government seals/stamps
+- [X] Confirm data accuracy
+- [X] Mint and list
 
 #### **Marketplace Features Testing**
 
-- [ ] NFT listed with custom name shows correctly
-- [ ] IPFS metadata link is clickable and works
-- [ ] IPFS link opens full metadata in new tab
-- [ ] Auto-generated name follows format: `icon + type + ID`
-- [ ] User can edit auto-generated name
-- [ ] Empty name field disables list button
-- [ ] Marketplace refreshes and shows new name
-- [ ] Purchase doesn't break with custom names
-- [ ] IPFS links work for old and new listings
+- [X] NFT listed with custom name shows correctly
+- [X] IPFS metadata link is clickable and works
+- [X] IPFS link opens full metadata in new tab
+- [X] Auto-generated name follows format: `icon + type + ID`
+- [X] User can edit auto-generated name
+- [X] Empty name field disables list button
+- [X] Marketplace refreshes and shows new name
+- [X] Purchase doesn't break with custom names
+- [X] IPFS links work for old and new listings
 
 #### **Error Handling**
 
-- [ ] Try uploading without selecting type → Warning shown
-- [ ] Try selecting type without file → Upload disabled
-- [ ] Upload corrupted file → Error handled gracefully
-- [ ] Disconnect wallet mid-process → Proper error message
-- [ ] Upload unsupported file type → Rejected with message
+- [X] Try uploading without selecting type → Warning shown
+- [X] Try selecting type without file → Upload disabled
+- [X] Upload corrupted file → Error handled gracefully
+- [X] Disconnect wallet mid-process → Proper error message
+- [X] Upload unsupported file type → Rejected with message
 
 ### **Automated Tests**
 
@@ -1062,28 +1089,6 @@ Special thanks to:
 - **Pinata** - For reliable IPFS infrastructure
 - **OpenZeppelin** - For secure smart contract libraries
 - **Chakra UI** - For beautiful components
-
----
-
-## 📞 Support & Contact
-
-### For Users
-
-- 📖 [Documentation](https://docs.aria-qie.dev)
-- 💬 [Discord Community](https://discord.gg/aria)
-- 🎥 [Video Tutorials](https://youtube.com/@aria-dev)
-
-### For Developers
-
-- 📚 [API Reference](https://api.aria-qie.dev/docs)
-- 🐛 [Report Bug](https://github.com/Nihal-Pandey-2302/ARIA-ON-QIE/issues)
-- 💡 [Request Feature](https://github.com/Nihal-Pandey-2302/ARIA-ON-QIE/issues/new)
-
-### For Enterprises
-
-- 📧 Business Inquiries: <business@aria-qie.dev>
-- 🤝 Partnerships: <partners@aria-qie.dev>
-- 💰 Investment: <invest@aria-qie.dev>
 
 ---
 
