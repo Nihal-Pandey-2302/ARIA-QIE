@@ -1,0 +1,404 @@
+# backend/app.py - FOCUSED DOCUMENT ANALYSIS BY TYPE
+from flask import Flask, request, jsonify
+from dotenv import load_dotenv
+import os
+import google.generativeai as genai
+import requests
+import json
+from flask_cors import CORS
+from pyzbar.pyzbar import decode
+from PIL import Image
+import cv2
+import numpy as np
+import pypdf
+import io
+from datetime import datetime
+import re
+
+# Import our blockchain service
+from blockchain_service import BlockchainService
+
+load_dotenv()
+app = Flask(__name__)
+CORS(app)
+
+# --- API KEY CONFIGURATION ---
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+PINATA_API_KEY = os.getenv("PINATA_API_KEY")
+PINATA_SECRET_API_KEY = os.getenv("PINATA_SECRET_API_KEY")
+
+# --- GEMINI AI INITIALIZATION ---
+genai.configure(api_key=GEMINI_API_KEY)
+model = genai.GenerativeModel('gemini-2.5-pro')
+
+# --- DOCUMENT TYPE DEFINITIONS WITH FOCUSED ANALYSIS ---
+DOCUMENT_TYPES = {
+    "invoice": {
+        "name": "Invoice",
+        "icon": "💰",
+        "fields": ["invoice_number", "total_amount", "currency", "date", "vendor_name", "buyer_name", "items"],
+        "authenticity_markers": ["company letterhead", "tax ID", "invoice number", "digital signature", "QR code"],
+        "analysis_focus": "Extract invoice details, verify mathematical calculations, check for official stamps/seals"
+    },
+    "property_deed": {
+        "name": "Property Deed",
+        "icon": "🏠",
+        "fields": ["property_address", "owner_name", "property_value", "transaction_date", "legal_description", "plot_number"],
+        "authenticity_markers": ["government seal", "notary stamp", "registration number", "official signatures"],
+        "analysis_focus": "Extract property details, verify legal descriptions, check for government authentication"
+    },
+    "vehicle_registration": {
+        "name": "Vehicle Registration",
+        "icon": "🚗",
+        "fields": ["vin", "make", "model", "year", "owner_name", "registration_date", "plate_number", "engine_number"],
+        "authenticity_markers": ["DMV/RTO seal", "registration number", "security watermarks", "holograms"],
+        "analysis_focus": "Extract vehicle specifications, verify VIN format, check for official RTO/DMV marks"
+    },
+    "certificate": {
+        "name": "Educational Certificate",
+        "icon": "🎓",
+        "fields": ["recipient_name", "institution_name", "degree_title", "date_issued", "grade", "credential_id"],
+        "authenticity_markers": ["university seal", "signatures", "embossed stamps", "security features"],
+        "analysis_focus": "Extract academic credentials, verify institution details, check for official seals"
+    },
+    "supply_chain": {
+        "name": "Supply Chain Document",
+        "icon": "📦",
+        "fields": ["shipment_id", "origin", "destination", "goods_description", "quantity", "value", "shipping_date", "carrier"],
+        "authenticity_markers": ["company logos", "tracking numbers", "barcodes", "carrier stamps"],
+        "analysis_focus": "Extract shipment details, verify tracking information, check for carrier authentication"
+    },
+    "medical_record": {
+        "name": "Medical Record",
+        "icon": "⚕️",
+        "fields": ["patient_name", "doctor_name", "diagnosis", "treatment", "date", "hospital_name", "prescription"],
+        "authenticity_markers": ["hospital letterhead", "doctor signature", "medical registration number", "hospital seal"],
+        "analysis_focus": "Extract medical information, verify doctor credentials, check for hospital authentication"
+    },
+    "legal_contract": {
+        "name": "Legal Contract",
+        "icon": "📜",
+        "fields": ["contract_type", "party_names", "effective_date", "expiry_date", "contract_value", "terms_summary"],
+        "authenticity_markers": ["party signatures", "notary seal", "witness signatures", "legal stamps"],
+        "analysis_focus": "Extract contract terms, verify party information, check for legal authentication"
+    },
+    "insurance_policy": {
+        "name": "Insurance Policy",
+        "icon": "🛡️",
+        "fields": ["policy_number", "insured_name", "coverage_amount", "premium", "start_date", "end_date", "insurer_name"],
+        "authenticity_markers": ["company logo", "policy number", "authorized signatures", "company seal"],
+        "analysis_focus": "Extract policy details, verify coverage information, check for insurer authentication"
+    }
+}
+
+def upload_to_ipfs(json_data: dict) -> tuple:
+    """Upload JSON metadata to IPFS via Pinata and return (full_url, hash_only)"""
+    if not PINATA_API_KEY or not PINATA_SECRET_API_KEY:
+        raise Exception("Pinata API keys not set in .env")
+    
+    headers = {
+        "Content-Type": "application/json",
+        "pinata_api_key": PINATA_API_KEY,
+        "pinata_secret_api_key": PINATA_SECRET_API_KEY
+    }
+    
+    body = {
+        "pinataContent": json_data,
+        "pinataMetadata": {
+            "name": json_data.get("name", "rwa_metadata.json")
+        }
+    }
+    
+    response = requests.post(
+        "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+        json=body,
+        headers=headers
+    )
+    response.raise_for_status()
+    
+    ipfs_hash_only = response.json().get("IpfsHash")
+    if not ipfs_hash_only:
+        raise Exception("Failed to get IPFS hash from Pinata response")
+    
+    return (f"https://gateway.pinata.cloud/ipfs/{ipfs_hash_only}", ipfs_hash_only)
+
+def find_and_decode_qr(document_bytes, mime_type):
+    """Attempt to find and decode QR codes in document"""
+    try:
+        if "pdf" in mime_type.lower():
+            pdf_file = pypdf.PdfReader(io.BytesIO(document_bytes))
+            for page in pdf_file.pages:
+                for image_file_object in page.images:
+                    img = Image.open(io.BytesIO(image_file_object.data))
+                    decoded_objects = decode(img)
+                    if decoded_objects:
+                        return decoded_objects[0].data.decode("utf-8")
+        else:
+            img_array = np.frombuffer(document_bytes, np.uint8)
+            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+            decoded_objects = decode(img)
+            if decoded_objects:
+                return decoded_objects[0].data.decode("utf-8")
+        return None
+    except Exception as e:
+        app.logger.warning(f"QR Code Scan Warning: {e}")
+        return None
+
+def generate_focused_prompt(doc_type: str) -> str:
+    """Generate AI prompt focused on specific document type"""
+    
+    doc_info = DOCUMENT_TYPES.get(doc_type)
+    if not doc_info:
+        doc_info = DOCUMENT_TYPES["invoice"]  # Fallback
+    
+    fields_str = ", ".join(doc_info["fields"])
+    markers_str = ", ".join(doc_info["authenticity_markers"])
+    
+    # Get current date for context
+    current_date = datetime.now().strftime("%B %d, %Y")
+    current_year = datetime.now().year
+    
+    prompt = f"""You are an expert {doc_info['name']} analyzer. This document is CONFIRMED to be a {doc_info['name']}.
+
+IMPORTANT CONTEXT:
+- Today's date is: {current_date}
+- Current year: {current_year}
+- Documents dated BEFORE today are VALID historical records
+- Documents dated AFTER today are suspicious and should be flagged
+
+YOUR TASK:
+Analyze this {doc_info['name']} and extract ALL relevant information with high precision.
+
+REQUIRED FIELDS TO EXTRACT:
+{fields_str}
+
+AUTHENTICITY VERIFICATION:
+Look for these markers: {markers_str}
+{doc_info['analysis_focus']}
+
+IMPORTANT RULES:
+1. Only extract data that is actually present in the document
+2. For dates: Use format YYYY-MM-DD if possible, otherwise keep original format
+3. For amounts: Include currency symbol and full numeric value
+4. For IDs/numbers: Extract exactly as shown
+5. If a required field is not found, return "Not found" for that field
+6. CRITICAL: When checking dates, compare them to TODAY'S DATE ({current_date}), NOT some past date
+7. Calculate authenticity score (0-100) based on:
+   - Presence of official markers (30 points)
+   - Document quality and clarity (20 points)
+   - Data consistency and completeness (30 points)
+   - Professional formatting (20 points)
+
+8. DATE VALIDATION RULES:
+   - If a document is dated in the PAST (before {current_date}), this is NORMAL and VALID
+   - Only flag dates as suspicious if they are AFTER {current_date} (future dates)
+   - Example: A document from August 2025 is VALID if we are in November 2025 or later
+   - Example: A document from December 2025 is SUSPICIOUS if we are in November 2025
+
+OUTPUT FORMAT (MUST BE VALID JSON):
+{{
+    "document_type": "{doc_type}",
+    "extracted_data": {{
+        // All fields from the {doc_info['name']} as key-value pairs
+        // Use the field names listed above
+    }},
+    "authenticity_score": 0-100,
+    "authenticity_details": {{
+        "official_markers_found": ["list of markers found"],
+        "missing_markers": ["list of expected but missing markers"],
+        "quality_assessment": "brief assessment"
+    }},
+    "verification_summary": "2-3 sentence summary of verification",
+    "suspicious_elements": [
+        "Only include items that are GENUINELY suspicious",
+        "Do NOT flag past dates as suspicious - only FUTURE dates (after {current_date})",
+        "Examples of real red flags: missing signatures, altered amounts, mismatched info"
+    ],
+    "confidence": 0-100,
+    "extraction_notes": "Any important notes about the extraction"
+}}
+
+CRITICAL: Return ONLY valid JSON. No markdown, no explanations, just the JSON object."""
+    
+    return prompt
+
+@app.route('/analyze_and_mint', methods=['POST'])
+def analyze_and_mint():
+    """Analyze document with focused AI analysis based on selected type"""
+    
+    # Validate request
+    if 'document' not in request.files:
+        return jsonify({"error": "No document part"}), 400
+    
+    document_file = request.files['document']
+    recipient_address = request.form.get("owner_address")
+    document_type = request.form.get("document_type", "invoice")  # Get selected type
+    
+    if document_file.filename == '':
+        return jsonify({"error": "No selected document"}), 400
+    
+    if not recipient_address:
+        return jsonify({"error": "No owner_address provided"}), 400
+    
+    if document_type not in DOCUMENT_TYPES:
+        return jsonify({"error": f"Invalid document type: {document_type}"}), 400
+    
+    try:
+        # Read document bytes
+        document_bytes = document_file.read()
+        
+        # Get document info
+        doc_info = DOCUMENT_TYPES[document_type]
+        
+        # Generate focused AI prompt
+        prompt = generate_focused_prompt(document_type)
+        
+        contents = [
+            {"mime_type": document_file.content_type, "data": document_bytes},
+            prompt
+        ]
+        
+        app.logger.info(f"Analyzing {doc_info['name']}: {document_file.filename}")
+        response = model.generate_content(contents)
+        
+        # Parse AI response
+        response_text = response.text.strip()
+        response_text = response_text.replace("```json", "").replace("```", "").strip()
+        ai_report_json = json.loads(response_text)
+        
+        # Ensure document_type is set correctly
+        ai_report_json["document_type"] = document_type
+        
+        # Post-process suspicious elements to remove false positives about past dates
+        if "suspicious_elements" in ai_report_json:
+            suspicious = ai_report_json["suspicious_elements"]
+            if isinstance(suspicious, list):
+                # Filter out any mentions of dates being "in the future" if they're actually in the past
+                filtered_suspicious = []
+                for item in suspicious:
+                    if isinstance(item, str):
+                        # Skip if it mentions future dates for dates that are clearly past
+                        lower_item = item.lower()
+                        if "future" in lower_item or "after" in lower_item:
+                            # Check if it mentions a date
+                            import re
+                            # Look for dates in various formats
+                            date_patterns = [
+                                r'\d{2}\.\d{2}\.\d{4}',  # DD.MM.YYYY
+                                r'\d{4}-\d{2}-\d{2}',    # YYYY-MM-DD
+                                r'\d{2}/\d{2}/\d{4}',    # MM/DD/YYYY
+                            ]
+                            
+                            has_date = any(re.search(pattern, item) for pattern in date_patterns)
+                            if has_date:
+                                # Extract year from the suspicious element
+                                year_match = re.search(r'20\d{2}', item)
+                                if year_match:
+                                    doc_year = int(year_match.group())
+                                    current_year = datetime.now().year
+                                    # Only keep if document year is genuinely in the future
+                                    if doc_year > current_year:
+                                        filtered_suspicious.append(item)
+                                    # Skip if document year is current or past
+                                    continue
+                        
+                        # Keep all other suspicious elements
+                        filtered_suspicious.append(item)
+                
+                ai_report_json["suspicious_elements"] = filtered_suspicious
+        
+        # QR Code verification
+        qr_content = find_and_decode_qr(document_bytes, document_file.content_type)
+        verification_method = "AI Analysis Only"
+        if qr_content:
+            verification_method = "✅ QR Code + AI Verified"
+            app.logger.info(f"QR Code found: {qr_content}")
+            ai_report_json["qr_code_content"] = qr_content
+            # Boost authenticity score if QR code is present
+            if "authenticity_score" in ai_report_json:
+                ai_report_json["authenticity_score"] = min(100, ai_report_json["authenticity_score"] + 10)
+        
+        ai_report_json["verification_method"] = verification_method
+        ai_report_json["verified_at"] = datetime.utcnow().isoformat()
+        
+        # Prepare enhanced NFT metadata
+        nft_metadata = {
+            "name": f"{doc_info['icon']} {doc_info['name']}: {document_file.filename}",
+            "description": f"AI-verified {doc_info['name']} tokenized as RWA NFT with comprehensive verification report",
+            "image": "https://gateway.pinata.cloud/ipfs/Qma5Fpw3Y2jL6vAacgEAA418f2f2KJEaJkkhq2tYmS3a1V",
+            "attributes": [
+                {"trait_type": "Document Type", "value": doc_info['name']},
+                {"trait_type": "Verification Method", "value": verification_method},
+                {"trait_type": "Authenticity Score", "value": str(ai_report_json.get("authenticity_score", 0))},
+                {"trait_type": "Confidence", "value": str(ai_report_json.get("confidence", 0))},
+                {"trait_type": "Verified Date", "value": datetime.utcnow().strftime("%Y-%m-%d")}
+            ],
+            "properties": {
+                "ai_report": ai_report_json,
+                "document_category": document_type,
+                "verification_platform": "A.R.I.A. on QIE Blockchain",
+                "ai_model": "Gemini 2.5 Pro"
+            }
+        }
+        
+        # Upload to IPFS
+        app.logger.info("Uploading metadata to IPFS...")
+        ipfs_url, ipfs_hash_only = upload_to_ipfs(nft_metadata)
+        app.logger.info(f"IPFS upload successful: {ipfs_hash_only}")
+        
+        # Mint NFT on blockchain
+        app.logger.info(f"Minting {doc_info['name']} NFT for {recipient_address}")
+        tx_hash = BlockchainService.mint_nft(recipient_address, ipfs_hash_only)
+        app.logger.info(f"Minting successful! Tx Hash: {tx_hash}")
+        
+        # Ensure tx_hash has 0x prefix
+        if not tx_hash.startswith('0x'):
+            tx_hash = '0x' + tx_hash
+        
+        return jsonify({
+            "success": True,
+            "txId": tx_hash,
+            "document_type": document_type,
+            "document_icon": doc_info['icon'],
+            "document_name": doc_info['name'],
+            "ai_report_display": ai_report_json,
+            "ipfs_link": ipfs_url
+        }), 200
+        
+    except json.JSONDecodeError as e:
+        app.logger.error(f"Failed to parse AI response as JSON: {e}", exc_info=True)
+        app.logger.error(f"AI Response was: {response_text}")
+        return jsonify({"error": "AI returned invalid JSON response", "details": str(e)}), 500
+    
+    except Exception as e:
+        app.logger.error(f"Error in /analyze_and_mint: {e}", exc_info=True)
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route('/supported_documents', methods=['GET'])
+def get_supported_documents():
+    """Return list of supported document types with metadata"""
+    return jsonify({
+        "supported_types": [
+            {
+                "type": doc_type,
+                "name": info["name"],
+                "icon": info["icon"],
+                "fields": info["fields"],
+                "authenticity_markers": info["authenticity_markers"]
+            }
+            for doc_type, info in DOCUMENT_TYPES.items()
+        ]
+    }), 200
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "ok", 
+        "message": "ARIA backend is running",
+        "supported_documents": len(DOCUMENT_TYPES),
+        "ai_model": "Gemini 2.5 Pro"
+    }), 200
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)

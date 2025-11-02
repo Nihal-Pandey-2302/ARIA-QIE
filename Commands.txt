@@ -1,0 +1,5 @@
+ npx hardhat node
+ npx hardhat run scripts/deploy.js --network localhost
+ source venv/bin/activate
+ python app.py
+ npm run dev

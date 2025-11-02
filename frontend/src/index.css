@@ -1,0 +1,49 @@
+/* src/index.css */
+
+/* --- Import Font --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+/* --- Body Styling for Light Mode --- */
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    transition: background-color 0.2s linear;
+}
+
+/* --- Body Styling for Dark Mode --- */
+.chakra-ui-dark body {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+}
+
+/* --- Main App Container Card Effect --- */
+/* This will make your main VStack feel like a floating card */
+.app-container>.chakra-vstack {
+    background: var(--chakra-colors-chakra-body-bg);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 10px 30px -15px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--chakra-colors-chakra-border-color);
+}
+
+/* --- Professional Button Hover Effects --- */
+.chakra-button {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out !important;
+}
+
+.chakra-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* --- Dropzone Enhancement --- */
+.dropzone-active {
+    border-color: var(--chakra-colors-brand-500) !important;
+    box-shadow: 0 0 0 3px var(--chakra-colors-brand-200) !important;
+}
+
+/* --- Headings --- */
+h1,
+h2,
+h3 {
+    font-weight: 700 !important;
+}
