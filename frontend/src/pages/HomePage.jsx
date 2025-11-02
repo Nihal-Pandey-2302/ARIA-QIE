@@ -1,4 +1,4 @@
-// src/pages/HomePage.jsx - WITH DOCUMENT TYPE SUPPORT
+// src/pages/HomePage.jsx - WITH IPFS LINK SUPPORT
 import { useState, useCallback } from 'react';
 import { VStack, Alert, AlertIcon, Heading, useToast, Box, Spinner, Text } from '@chakra-ui/react';
 import FileUpload from '../components/FileUpload';
@@ -71,7 +71,6 @@ export default function HomePage({ address, provider, signer }) {
     }
   }, [provider, toast]);
 
-  // ✅ UPDATED: Now accepts documentType parameter
   const handleAnalyzeAndMint = useCallback(async (documentType) => {
     if (!selectedFile) return toast({ title: "No file selected", status: "warning" });
     if (!address) return toast({ title: "Please connect your wallet", status: "warning" });
@@ -86,7 +85,6 @@ export default function HomePage({ address, provider, signer }) {
       const formData = new FormData();
       formData.append('document', selectedFile);
       formData.append('owner_address', address);
-      // ✅ NEW: Send document type to backend
       formData.append('document_type', documentType);
 
       console.log("Sending request to backend...");
@@ -165,11 +163,16 @@ export default function HomePage({ address, provider, signer }) {
         {apiResult && (workflowStatus === 'minted' || apiResult.confirmedTokenId) && (
           <>
             <AIReportCard report={apiResult.ai_report_display} ipfsLink={apiResult.ipfs_link} />
+            {/* ✅ UPDATED: Pass ipfsLink to NftActions */}
             <NftActions
               txId={apiResult.txId}
               address={address}
               tokenId={apiResult.confirmedTokenId}
               signer={signer}
+              ipfsLink={apiResult.ipfs_link}
+              documentType={apiResult.document_type}
+              documentIcon={apiResult.document_icon}
+              documentName={apiResult.document_name}
             />
           </>
         )}

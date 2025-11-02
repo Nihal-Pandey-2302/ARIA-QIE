@@ -14,6 +14,7 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
     struct Listing {
         address seller;
         uint256 price;
+        string name;  // ✅ NEW: NFT name for listing
     }
 
     // Mappings for marketplace and staking
@@ -21,7 +22,7 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
     mapping(address => uint256) public stakedBalances;
     uint256 public totalStaked;
 
-    event AssetListed(uint256 indexed tokenId, address indexed seller, uint256 price);
+    event AssetListed(uint256 indexed tokenId, address indexed seller, uint256 price, string name);
     event AssetUnlisted(uint256 indexed tokenId);
     event AssetPurchased(uint256 indexed tokenId, address indexed buyer, address seller, uint256 price);
     event TokensStaked(address indexed user, uint256 amount);
@@ -35,15 +36,15 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
 
     // --- MARKETPLACE FUNCTIONS ---
 
-    function listAsset(uint256 tokenId, uint256 price) external nonReentrant {
+    // ✅ UPDATED: Now accepts name parameter
+    function listAsset(uint256 tokenId, uint256 price, string memory name) external nonReentrant {
         require(price > 0, "Price must be greater than zero");
         require(ariaNFT.ownerOf(tokenId) == msg.sender, "You are not the owner");
         require(listings[tokenId].price == 0, "Asset is already listed");
+        require(bytes(name).length > 0, "Name cannot be empty");
 
-        // Remove approval line
-
-        listings[tokenId] = Listing(msg.sender, price);
-        emit AssetListed(tokenId, msg.sender, price);
+        listings[tokenId] = Listing(msg.sender, price, name);
+        emit AssetListed(tokenId, msg.sender, price, name);
     }
 
     function unlistAsset(uint256 tokenId) external {
@@ -65,6 +66,11 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
         emit AssetPurchased(tokenId, msg.sender, listing.seller, listing.price);
     }
 
+    // ✅ NEW: Function to get listing name
+    function getListingName(uint256 tokenId) external view returns (string memory) {
+        return listings[tokenId].name;
+    }
+
     // --- STAKING FUNCTIONS ---
 
     function stake(uint256 amount) external nonReentrant {
@@ -72,7 +78,6 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
         stakedBalances[msg.sender] += amount;
         totalStaked += amount;
         
-        // Transfer tokens from the user to this contract for staking
         ariaToken.transferFrom(msg.sender, address(this), amount);
         emit TokensStaked(msg.sender, amount);
     }
@@ -82,24 +87,15 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
         stakedBalances[msg.sender] -= amount;
         totalStaked -= amount;
         
-        // Transfer tokens back to the user
         ariaToken.transfer(msg.sender, amount);
         emit TokensUnstaked(msg.sender, amount);
     }
 
-    // Note: A mechanism to add rewards to this contract is needed.
-    // For now, rewards can be funded by manually transferring AriaTokens to this contract.
     function claimRewards() external nonReentrant {
         uint256 rewards = getClaimableRewardsFor(msg.sender);
         require(rewards > 0, "No rewards to claim");
 
-        // Simple reward distribution logic. Assumes rewards are AriaTokens.
-        // A more robust system might use snapshots or reward-per-token-staked calculations.
         ariaToken.transfer(msg.sender, rewards);
-
-        // A simple implementation might reset rewards upon claim, which is complex.
-        // A better approach is to have a separate function to distribute rewards proportionally.
-        // For the hackathon, this function can be a placeholder or simplified.
         emit RewardsClaimed(msg.sender, rewards);
     }
 

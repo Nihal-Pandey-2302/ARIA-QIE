@@ -254,51 +254,210 @@ This comprehensive report demonstrates:
 
 ---
 
-### 5️⃣ **Step 5: NFT Minted & Listed on Marketplace**
+### 5️⃣ **Step 5: List Your NFT with Custom Name**
 
 <p align="center">
-  <img src="./screenshots/05-marketplace-listing.png" alt="NFT Listed on Marketplace" width="100%">
+  <img src="./screenshots/05-listing-form.png" alt="List NFT with Name and Price" width="100%">
 </p>
 
-**Marketplace Features:**
+**Smart Listing Interface:**
 
-#### **Header:**
+After successful minting, users are presented with an intuitive listing form:
 
-- 🎨 **ARIA Marketplace** title
-- **Your ARIA Balance**: Displayed in real-time
-- **Mint ARIA Tokens** button - Quick access to get more tokens
-- **Refresh Marketplace** button - Update listings
+#### **Success Alert:**
+- ✅ **Mint Transaction Confirmed** with token ID
+- **Document Type Badge** - Shows the verified document category
+- **Transaction Link** - View on QIE block explorer
+- **IPFS Metadata Link** - Direct access to immutable metadata
 
-#### **NFT Card Display:**
+#### **Step 2: List NFT on Marketplace**
 
-Each listed NFT shows:
+**NFT Display Name:**
+- **Auto-generated smart name**: `🏠 Property Deed #5`
+  - Combines document icon + document type + token ID
+  - Fully customizable by user
+- Falls back to `RWA NFT #5` if document info unavailable
+- Helper text: "This name will be displayed on the marketplace"
 
-- **Badge #6** - Token ID
-- **"For Sale"** status badge (green)
-- **NFT Image** - Visual representation or placeholder
-- **Title**: "NFT #6" or custom name
-- **Description**: "AI-Verified Asset"
-- **Price Box**:
-  - Label: "Price"
-  - Amount: **500 ARIA** (example)
-  - Prominent purple display
-- **Buy Button** - Large, easy to click
-- **Seller Info**: Truncated wallet address
+**Listing Price:**
+- Enter price in ARIA tokens
+- Visual ARIA token label
+- Helper text: "Set your asking price in ARIA tokens"
 
-#### **Smart Features:**
+**List Button:**
+- Only enabled when BOTH name AND price are provided
+- Two-step process:
+  1. Approve marketplace contract (if needed)
+  2. List NFT with name and price
+- Loading states with clear progress indicators
 
-- **Own NFT Detection**: Shows "Your Listing" if you own it
-- **Balance Check**: Disables buy if insufficient ARIA
-- **Quick Mint Link**: "Mint ARIA to Buy" for low balances
-- **Responsive Grid**: 1-3 columns based on screen size
+**User Benefits:**
+- 📝 **Custom naming** makes NFTs easily identifiable
+- 🔗 **IPFS transparency** builds buyer trust
+- ⚡ **Quick listing** in 2 clicks
+- 💡 **Smart defaults** reduce friction
 
-**User Journey Complete:**
-From document upload to marketplace listing in **under 60 seconds**. Users can now:
+---
 
-1. ✅ View their minted NFT
-2. ✅ See all marketplace listings
-3. ✅ Buy other verified assets with ARIA tokens
-4. ✅ Earn from selling their verified documents
+### 6️⃣ **Step 6: NFT Listed on Marketplace with Name & Metadata**
+
+<p align="center">
+  <img src="./screenshots/06-marketplace-with-names.png" alt="Marketplace with Named NFTs" width="100%">
+</p>
+
+**Enhanced Marketplace Display:**
+
+Each NFT card now shows comprehensive information:
+
+#### **Card Header:**
+- **Token Badge**: #6 (purple)
+- **Status Badge**: "For Sale" (green) or "Your NFT" (yellow)
+
+#### **Visual & Identity:**
+- **NFT Image** - Document thumbnail or default image
+- **Custom Name** - `🏠 Property Deed Mumbai Central` (example)
+  - Shows the exact name provided by seller
+  - Makes listings instantly recognizable
+
+#### **Metadata Access:**
+- **IPFS Link** - Clickable "View IPFS Metadata ↗" button
+  - Opens full metadata in new tab
+  - Displays complete AI analysis report
+  - Shows verification details and extracted data
+  - Builds transparency and trust
+
+#### **Description:**
+- Brief description from metadata
+- Truncated to 2 lines with ellipsis
+
+#### **Price Display:**
+- Large, prominent price box
+- Amount in ARIA tokens
+- Purple accent for visibility
+
+#### **Action Buttons:**
+
+**For Other Users' NFTs:**
+- **"Buy Now"** - Large teal button
+  - Enabled if sufficient ARIA balance
+  - Shows "Insufficient Balance" if not enough ARIA
+  - Loading state during purchase
+- **"Mint ARIA to Buy"** - Quick access to token minting
+
+**For Your Own NFTs:**
+- **"Your Listing"** - Disabled yellow button
+- Prevents accidental self-purchase
+
+#### **Seller Information:**
+- Truncated wallet address: `0x1234...5678`
+- Easy to copy/verify
+
+**Why This Matters:**
+- **Professional Display** - Looks like a real marketplace
+- **Informed Decisions** - Buyers can verify metadata before purchase
+- **Trust Building** - IPFS links prove authenticity
+- **Easy Discovery** - Custom names make NFTs searchable
+
+---
+
+### 7️⃣ **Step 7: Mint ARIA Tokens**
+
+<p align="center">
+  <img src="./screenshots/06-mint-aria.png" alt="Mint ARIA Tokens Page" width="100%">
+</p>
+
+**Overview:**  
+The **Mint ARIA** page allows users to convert ETH (or QIE) into **ARIA utility tokens**, used for marketplace transactions, staking, and governance.
+
+**Key Features:**
+
+- Simple ETH-to-ARIA conversion  
+- Real-time balance display  
+- One-click minting  
+- Gas-optimized contract interaction  
+
+**Why It Matters:**  
+This establishes **ARIA** as the native utility token powering the ecosystem.
+
+---
+
+### 8️⃣ **Step 8: Stake ARIA & Earn Rewards**
+
+<p align="center">
+  <img src="./screenshots/07-staking-rewards.png" alt="ARIA Staking and Rewards Page" width="100%">
+</p>
+
+**Overview:**  
+The **Staking & Rewards** module allows users to stake ARIA tokens and earn proportional rewards from marketplace fees.
+
+**Key Features:**
+
+- 💎 Stake / Unstake ARIA instantly  
+- 💰 Claim Rewards anytime  
+- 📊 Live pool stats:
+  - Total staked
+  - Personal stake
+  - Claimable rewards  
+- 🔒 Non-custodial staking (user retains wallet control)
+
+**Displayed Metrics:**
+
+| Metric | Description |
+|---------|--------------|
+| **Your ARIA Balance** | Total ARIA held in wallet |
+| **Staked ARIA** | Tokens currently staked |
+| **Claimable Rewards** | ARIA earned from marketplace fees |
+| **Total Pool Size** | Combined staked ARIA |
+
+**Why It Matters:**  
+Staking transforms ARIA holders into active participants, decentralizing governance and reward distribution.
+
+---
+
+## 🆕 Latest Features (Week 2 Update)
+
+### **Enhanced Marketplace Experience**
+
+#### **1. Custom NFT Naming System**
+- **Smart Auto-Generation**: Names like `🏠 Property Deed #5` automatically created
+- **Full Customization**: Users can edit before listing
+- **Icon Integration**: Document type icons in names
+- **Fallback Logic**: Default names if document data unavailable
+
+**Technical Implementation:**
+```javascript
+// Auto-generates from: documentIcon + documentName + tokenId
+const defaultName = `${documentIcon} ${documentName} #${tokenId}`;
+// Example: "🏠 Property Deed #5"
+```
+
+#### **2. IPFS Metadata Transparency**
+- **Clickable Links**: Every NFT card has "View IPFS Metadata ↗" button
+- **Direct Access**: Opens full verification report in new tab
+- **Buyer Confidence**: Full transparency before purchase
+- **Immutable Proof**: IPFS ensures data integrity
+
+**What's Visible:**
+- Complete AI analysis report
+- All extracted document fields
+- Authenticity markers detected
+- Verification method details
+- Confidence and authenticity scores
+
+#### **3. Enhanced Listing Flow**
+- **2-Field Form**: Just name + price (streamlined)
+- **Visual Feedback**: Success alerts with IPFS links
+- **Smart Defaults**: Pre-filled names save time
+- **Error Prevention**: Disabled states until ready
+
+**User Journey:**
+```
+Mint NFT → See Success Alert (with IPFS link) 
+         → Auto-filled Name (editable) 
+         → Enter Price 
+         → List (2 clicks)
+         → Live on Marketplace with Name & IPFS Link
+```
 
 ---
 
@@ -344,6 +503,51 @@ User Buys with ARIA ← Seller Receives ARIA ← 5% Fee → Staking Rewards
 
 ---
 
+## 🎨 Marketplace Features
+
+### **Custom NFT Naming**
+Every listed NFT can have a **custom display name** that makes it instantly recognizable:
+
+**Examples:**
+- `🏠 Luxury Villa Mumbai Central #42`
+- `🚗 Toyota Camry 2024 Registration #15`
+- `💰 Amazon Invoice August 2025 #8`
+- `🎓 Stanford Computer Science Degree #23`
+
+**Benefits:**
+- ✅ **Better Discoverability** - Easy to search and find
+- ✅ **Professional Look** - Marketplace looks polished
+- ✅ **User Control** - Sellers choose their branding
+- ✅ **Smart Defaults** - Auto-generated names save time
+
+### **IPFS Metadata Transparency**
+Every NFT has a **direct link to IPFS metadata**:
+
+**What Users Can View:**
+- Complete AI verification report
+- All extracted document data
+- Authenticity markers found
+- Verification method (AI + QR)
+- Suspicious elements (if any)
+- Confidence scores
+
+**Why It Matters:**
+- 🔍 **Full Transparency** - Buyers see exactly what they're getting
+- 🔒 **Immutable Proof** - IPFS ensures data can't be changed
+- 🤝 **Trust Building** - No hidden information
+- ✅ **Due Diligence** - Buyers can verify before purchase
+
+### **Smart Listing UX**
+The listing process is designed for simplicity:
+
+1. **Auto-Generated Names** - Smart defaults based on document type
+2. **Two Required Fields** - Name + Price (that's it!)
+3. **Visual Feedback** - Clear progress indicators
+4. **Error Prevention** - Button disabled until all fields filled
+5. **Transaction Tracking** - Real-time status updates
+
+---
+
 ## 🏗️ Technical Architecture
 
 ### **System Flow Diagram**
@@ -367,6 +571,7 @@ User Buys with ARIA ← Seller Receives ARIA ← 5% Fee → Staking Rewards
 │  │ 4. Scan for QR codes in document                     │  │
 │  │ 5. Parse and validate AI response                    │  │
 │  │ 6. Filter suspicious elements                        │  │
+│  │ 7. Return: txId, ipfs_link, document_metadata ← NEW  │  │
 │  └──────────────────────────────────────────────────────┘  │
 └───────────────────────────────┬─────────────────────────────┘
                                 │
@@ -377,17 +582,27 @@ User Buys with ARIA ← Seller Receives ARIA ← 5% Fee → Staking Rewards
         │                     │ │                     │
         │ • Store metadata    │ │ • Mint NFT          │
         │ • Generate hash     │ │ • Assign token ID   │
-        │ • Return IPFS URL   │ │ • Emit events       │
+        │ • Return IPFS URL ←─┼─│ • Store token URI   │
         └─────────────────────┘ └─────────────────────┘
                     │                       │
                     └───────────┬───────────┘
                                 ▼
                     ┌─────────────────────┐
+                    │  LISTING INTERFACE  │
+                    │                     │
+                    │ • Auto-name NFT ← NEW                │
+                    │ • Set price (ARIA)  │
+                    │ • Display IPFS link ← NEW            │
+                    └─────────────────────┘
+                                │
+                                ▼
+                    ┌─────────────────────┐
                     │   MARKETPLACE       │
                     │                     │
-                    │ • List NFT          │
-                    │ • Set price (ARIA)  │
+                    │ • Show NFT name ← NEW                │
+                    │ • Display IPFS link ← NEW            │
                     │ • Enable trading    │
+                    │ • Track ownership   │
                     └─────────────────────┘
 ```
 
@@ -402,6 +617,11 @@ User Buys with ARIA ← Seller Receives ARIA ← 5% Fee → Staking Rewards
 - **File Handling**: React Dropzone for drag-and-drop
 - **State Management**: React Hooks (useState, useEffect, useCallback)
 - **Routing**: React Router v6
+- **Enhanced Features**: 
+  - Custom NFT naming system
+  - IPFS metadata display
+  - Smart default name generation
+  - Real-time marketplace updates
 
 #### **Backend**
 
@@ -584,6 +804,9 @@ Frontend will start on `http://localhost:5173`
 | Gas Fees | **~$0.01** | $5-50 | $0.10-1 |
 | Marketplace | **✅ Built-in** | ❌ No | ✅ Yes |
 | Staking Rewards | **✅ Yes** | ❌ No | ❌ No |
+| Custom NFT Names | **✅ Yes** | ❌ No | ❌ No |
+| IPFS Metadata Links | **✅ Yes** | Partial | ❌ No |
+| Smart Naming | **✅ Auto-generated** | Manual | Manual |
 | Open Source | **✅ Yes** | ❌ No | Partial |
 
 ---
@@ -599,6 +822,8 @@ Frontend will start on `http://localhost:5173`
 - [x] NFT minting on QIE
 - [x] Marketplace with ARIA token
 - [x] Staking mechanism
+- [x] Custom NFT naming system
+- [x] IPFS metadata transparency
 
 ### **🚧 Phase 2: DeFi Integration (In Progress - Week 2)**
 
@@ -658,6 +883,18 @@ Frontend will start on `http://localhost:5173`
 - [ ] Check for government seals/stamps
 - [ ] Confirm data accuracy
 - [ ] Mint and list
+
+#### **Marketplace Features Testing**
+
+- [ ] NFT listed with custom name shows correctly
+- [ ] IPFS metadata link is clickable and works
+- [ ] IPFS link opens full metadata in new tab
+- [ ] Auto-generated name follows format: `icon + type + ID`
+- [ ] User can edit auto-generated name
+- [ ] Empty name field disables list button
+- [ ] Marketplace refreshes and shows new name
+- [ ] Purchase doesn't break with custom names
+- [ ] IPFS links work for old and new listings
 
 #### **Error Handling**
 
@@ -742,7 +979,7 @@ npm run test:e2e
 **Development Timeline**:
 
 - Week 1: Multi-document support, focused AI analysis ✅
-- Week 2: QIEDEX fractionalization 🚧
+- Week 2: Custom naming, IPFS transparency, QIEDEX fractionalization 🚧
 - Week 3: QIE oracle integration 📅
 - Week 4: QIE mainnet deployment 📅
 - Week 5: Documentation & polish 📅

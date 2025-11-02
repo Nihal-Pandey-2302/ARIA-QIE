@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { 
-  Box, Button, Heading, Text, VStack, Spinner, SimpleGrid, Image, Badge, HStack, useToast 
+  Box, Button, Heading, Text, VStack, Spinner, SimpleGrid, Image, Badge, HStack, useToast, 
+  Link, Input, InputGroup, InputLeftElement, Icon
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
+import { ExternalLink, Search } from 'lucide-react';
 import { 
   MARKETPLACE_ADDRESS, MARKETPLACE_ABI, 
   ARIA_NFT_ADDRESS, ARIA_NFT_ABI, 
@@ -13,9 +15,11 @@ import {
 
 const MarketplacePage = ({ provider, account }) => {
   const [listings, setListings] = useState([]);
+  const [filteredListings, setFilteredListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [ariaBalance, setAriaBalance] = useState(0);
-  const [purchasing, setPurchasing] = useState(null); // Track which NFT is being purchased
+  const [purchasing, setPurchasing] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -23,7 +27,6 @@ const MarketplacePage = ({ provider, account }) => {
   const fetchAriaBalance = async () => {
     if (!provider || !account) return;
     try {
-      // Read-only contract with provider
       const ariaTokenContract = new ethers.Contract(ARIA_TOKEN_ADDRESS, ARIA_TOKEN_ABI, provider);
       const balance = await ariaTokenContract.balanceOf(account);
       setAriaBalance(Number(balance) / 10 ** TOKEN_DECIMALS);
@@ -39,7 +42,6 @@ const MarketplacePage = ({ provider, account }) => {
     setLoading(true);
 
     try {
-      // Read-only contracts for listing fetch
       const marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, provider);
       const nftContract = new ethers.Contract(ARIA_NFT_ADDRESS, ARIA_NFT_ABI, provider);
 
@@ -53,22 +55,52 @@ const MarketplacePage = ({ provider, account }) => {
         if (!listing || listing.seller === ethers.ZeroAddress || listing.price === 0n) continue;
 
         const price = Number(listing.price) / 10 ** TOKEN_DECIMALS;
+        const listingName = listing.name || `NFT #${i}`;
+        
         let metadata = {};
+        let ipfsLink = null;
+        
         try {
           const tokenURI = await nftContract.tokenURI(i);
+          console.log(`NFT #${i} Raw tokenURI:`, tokenURI);
+          
+          // Handle different URI formats
           if (tokenURI.startsWith("http")) {
+            // Full URL format
+            ipfsLink = tokenURI;
             const res = await fetch(tokenURI);
             if (res.ok) metadata = await res.json();
+          } else if (tokenURI.startsWith("ipfs://")) {
+            // IPFS protocol format
+            const ipfsHash = tokenURI.replace("ipfs://", "");
+            ipfsLink = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+            const res = await fetch(ipfsLink);
+            if (res.ok) metadata = await res.json();
+          } else if (tokenURI.startsWith("Qm") || tokenURI.startsWith("bafy")) {
+            // Plain IPFS hash format (Qm... or bafy...)
+            ipfsLink = `https://gateway.pinata.cloud/ipfs/${tokenURI}`;
+            const res = await fetch(ipfsLink);
+            if (res.ok) metadata = await res.json();
           }
+          
+          console.log(`NFT #${i} IPFS Link:`, ipfsLink);
         } catch (err) {
           console.warn(`⚠️ Failed to fetch metadata for token ${i}`, err);
         }
 
-        items.push({ tokenId: Number(i), price, seller: listing.seller, metadata });
+        items.push({ 
+          tokenId: Number(i), 
+          price, 
+          seller: listing.seller, 
+          name: listingName,
+          metadata,
+          ipfsLink
+        });
       }
 
       console.log("✅ Fetched listings:", items);
       setListings(items);
+      setFilteredListings(items);
     } catch (err) {
       console.error("❌ Error fetching listings:", err);
       toast({
@@ -83,9 +115,28 @@ const MarketplacePage = ({ provider, account }) => {
     }
   };
 
+  // --- Search filter ---
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredListings(listings);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = listings.filter(listing => {
+      const nameMatch = listing.name?.toLowerCase().includes(query);
+      const tokenIdMatch = listing.tokenId.toString().includes(query);
+      const priceMatch = listing.price.toString().includes(query);
+      const descMatch = listing.metadata?.description?.toLowerCase().includes(query);
+      
+      return nameMatch || tokenIdMatch || priceMatch || descMatch;
+    });
+
+    setFilteredListings(filtered);
+  }, [searchQuery, listings]);
+
   // --- Buy NFT using ARIA tokens ---
   const handleBuy = async (tokenId, price, seller) => {
-    // Validate inputs
     if (!provider) {
       toast({
         title: "Provider not available",
@@ -118,7 +169,6 @@ const MarketplacePage = ({ provider, account }) => {
     setPurchasing(tokenId);
 
     try {
-      // ✅ FIX: Properly await getSigner()
       const signer = await provider.getSigner();
       console.log("✅ Signer obtained:", await signer.getAddress());
 
@@ -128,7 +178,6 @@ const MarketplacePage = ({ provider, account }) => {
       const priceInWei = ethers.parseUnits(price.toString(), TOKEN_DECIMALS);
       console.log("💰 Price in wei:", priceInWei.toString());
 
-      // Step 1: Approve marketplace to spend ARIA tokens
       toast({
         title: "Step 1/2: Approving ARIA tokens",
         status: "info",
@@ -143,7 +192,6 @@ const MarketplacePage = ({ provider, account }) => {
 
       toast.closeAll();
 
-      // Step 2: Purchase NFT
       toast({
         title: "Step 2/2: Purchasing NFT",
         status: "info",
@@ -165,7 +213,6 @@ const MarketplacePage = ({ provider, account }) => {
         isClosable: true,
       });
 
-      // Refresh data
       await fetchListings();
       await fetchAriaBalance();
 
@@ -175,7 +222,6 @@ const MarketplacePage = ({ provider, account }) => {
       
       let errorMsg = "Transaction failed. See console for details.";
       
-      // Parse common errors
       if (err.message?.includes("user rejected")) {
         errorMsg = "Transaction was rejected";
       } else if (err.message?.includes("insufficient funds")) {
@@ -198,7 +244,6 @@ const MarketplacePage = ({ provider, account }) => {
     }
   };
 
-  // --- Navigate to Mint ARIA page ---
   const handleMintAriaButton = () => {
     navigate("/mint-aria");
   };
@@ -221,12 +266,14 @@ const MarketplacePage = ({ provider, account }) => {
     <Box mt={2} p={6} shadow="lg" borderWidth="1px" borderRadius="xl" width="100%" bg="gray.800">
       <VStack spacing={4} mb={6}>
         <Heading as="h2" size="lg" textAlign="center">🎨 ARIA Marketplace</Heading>
+        
         <Text fontSize="sm" color="gray.400" textAlign="center" maxW="2xl">
           Your ARIA Balance: <Text as="span" color={ariaBalance > 0 ? "green.400" : "red.400"} fontWeight="bold">
             {ariaBalance.toFixed(2)} {TOKEN_DISPLAY}
           </Text>
         </Text>
-        <HStack spacing={3}>
+
+        <HStack spacing={3} width="100%" maxW="2xl">
           <Button onClick={handleMintAriaButton} colorScheme="orange" size="sm">
             Mint ARIA Tokens
           </Button>
@@ -234,23 +281,47 @@ const MarketplacePage = ({ provider, account }) => {
             Refresh Marketplace
           </Button>
         </HStack>
+
+        {/* Search Bar */}
+        <InputGroup maxW="2xl" size="md">
+          <InputLeftElement pointerEvents="none">
+            <Search size={18} color="gray" />
+          </InputLeftElement>
+          <Input
+            placeholder="Search by name, token ID, price, or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            bg="gray.700"
+            borderColor="gray.600"
+            _hover={{ borderColor: "gray.500" }}
+            _focus={{ borderColor: "blue.400", boxShadow: "0 0 0 1px #3182ce" }}
+          />
+        </InputGroup>
+
+        {searchQuery && (
+          <Text fontSize="sm" color="gray.400">
+            Found {filteredListings.length} {filteredListings.length === 1 ? 'result' : 'results'}
+          </Text>
+        )}
       </VStack>
 
-      {listings.length === 0 ? (
+      {filteredListings.length === 0 ? (
         <VStack py={10}>
-          <Text>No NFTs listed yet.</Text>
-          <Text fontSize="sm" color="gray.400">List your NFT from the Mint page to see it here.</Text>
+          <Text>{searchQuery ? 'No NFTs match your search.' : 'No NFTs listed yet.'}</Text>
+          <Text fontSize="sm" color="gray.400">
+            {searchQuery ? 'Try a different search term.' : 'List your NFT from the Mint page to see it here.'}
+          </Text>
         </VStack>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-          {listings.map((listing) => {
+          {filteredListings.map((listing) => {
             const isOwnNFT = listing.seller.toLowerCase() === account.toLowerCase();
             const canAfford = ariaBalance >= listing.price;
             const isPurchasing = purchasing === listing.tokenId;
 
             return (
               <Box key={listing.tokenId} p={5} shadow="md" borderWidth="1px" borderRadius="md" bg="gray.700">
-                <VStack spacing={3}>
+                <VStack spacing={3} align="stretch">
                   <HStack justify="space-between" width="100%">
                     <Badge colorScheme="purple">#{listing.tokenId}</Badge>
                     <Badge colorScheme={isOwnNFT ? "yellow" : "green"}>
@@ -260,17 +331,48 @@ const MarketplacePage = ({ provider, account }) => {
 
                   <Image
                     src={listing.metadata?.image || "https://i.postimg.cc/PJY2gmC0/LOGO.png"}
-                    alt={listing.metadata?.name || "NFT"}
+                    alt={listing.name}
                     borderRadius="md"
                     boxSize="200px"
                     objectFit="cover"
                     fallbackSrc="https://i.postimg.cc/PJY2gmC0/LOGO.png"
                   />
 
-                  <Heading size="md" noOfLines={1}>{listing.metadata?.name || `NFT #${listing.tokenId}`}</Heading>
+                  <Heading size="md" noOfLines={1}>{listing.name}</Heading>
+                  
                   <Text fontSize="sm" color="gray.400" noOfLines={2}>
                     {listing.metadata?.description || "AI-Verified Asset"}
                   </Text>
+
+                  {/* IPFS Link - Now with better styling and visibility */}
+                  {listing.ipfsLink && (
+                    <Link 
+                      href={listing.ipfsLink} 
+                      isExternal 
+                      color="cyan.300"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      _hover={{ color: "cyan.200", textDecoration: "underline" }}
+                      bg="gray.800"
+                      px={3}
+                      py={2}
+                      borderRadius="md"
+                      justifyContent="center"
+                    >
+                      <ExternalLink size={14} />
+                      View IPFS Metadata
+                    </Link>
+                  )}
+
+                  {/* Show message if IPFS link is missing */}
+                  {!listing.ipfsLink && (
+                    <Text fontSize="xs" color="gray.500" textAlign="center" fontStyle="italic">
+                      IPFS metadata unavailable
+                    </Text>
+                  )}
 
                   <Box bg="gray.800" p={3} borderRadius="md" width="100%">
                     <Text fontSize="xs" color="gray.400">Price</Text>
@@ -314,7 +416,7 @@ const MarketplacePage = ({ provider, account }) => {
                     </Button>
                   )}
 
-                  <Text fontSize="xs" color="gray.500">
+                  <Text fontSize="xs" color="gray.500" textAlign="center">
                     Seller: {listing.seller.slice(0, 6)}...{listing.seller.slice(-4)}
                   </Text>
                 </VStack>
