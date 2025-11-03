@@ -303,7 +303,7 @@ This flow guides the user through creating a new ERC20 token without needing to 
 ### 7️⃣ **Step 7: Fractionalization Complete (Ready for QIEDEX)**
 
 <p align="center">
-  <img src="./screenshots/fraction_form.png" alt="Fractionalization Success" width="100%">
+  <img src="./screenshots/fraction_done.png" alt="Fractionalization Success" width="100%">
 </p>
 
 **Fractionalization Details:**
