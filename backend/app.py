@@ -15,8 +15,9 @@ import io
 from datetime import datetime
 import re
 
-# Import our blockchain service
+# Import our blockchain service and QIEDEX service
 from blockchain_service import BlockchainService
+from qiedex_service import QIEDEXService
 
 load_dotenv()
 app = Flask(__name__)

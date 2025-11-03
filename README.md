@@ -73,8 +73,10 @@ Support for **8+ document types** with automatic AI classification and focused a
 - Real-time AI analysis with progress tracking
 - Comprehensive verification reports
 - Instant NFT minting
-- Built-in marketplace for trading
-- Staking rewards system
+- **🪙 Built-in Fractionalization** - Instantly split any RWA NFT into QIE20 tokens
+- **🛒 Built-in Marketplace** - For trading whole (ERC721) assets
+- **🔗 QIEDEX Integration** - For trading fractional (ERC20) assets
+- **💰 Staking Rewards System** - Earn fees from the protocol
 
 ---
 
@@ -254,57 +256,78 @@ This comprehensive report demonstrates:
 
 ---
 
-### 5️⃣ **Step 5: List Your NFT with Custom Name**
+### 5️⃣ **Step 5: Choose Your Liquidity Path (List or Fractionalize)**
 
 <p align="center">
-  <img src="./screenshots/05-listing-form.png" alt="List NFT with Name and Price" width="100%">
+  <img src="./screenshots/optiona_and_b.png" alt="Option A: List, Option B: Fractionalize" width="100%">
 </p>
 
-**Smart Listing Interface:**
+**What's Shown:**
 
-After successful minting, users are presented with an intuitive listing form:
+After successful minting, the user is given two powerful, distinct options for their new RWA NFT, all from the same interface:
 
-#### **Success Alert:**
+**Option A: List on Marketplace**
 
-- ✅ **Mint Transaction Confirmed** with token ID
-- **Document Type Badge** - Shows the verified document category
-- **Transaction Link** - View on QIE block explorer
-- **IPFS Metadata Link** - Direct access to immutable metadata
+* For **whole ownership** sales.
+* The user sets a single price (in ARIA) for the entire ERC721 NFT.
+* This is ideal for high-value, single-purchaser assets.
 
-#### **Step 2: List NFT on Marketplace**
+**Option B: Fractionalize**
 
-**NFT Display Name:**
-
-- **Auto-generated smart name**: `🏠 Property Deed #5`
-  - Combines document icon + document type + token ID
-  - Fully customizable by user
-- Falls back to `RWA NFT #5` if document info unavailable
-- Helper text: "This name will be displayed on the marketplace"
-
-**Listing Price:**
-
-- Enter price in ARIA tokens
-- Visual ARIA token label
-- Helper text: "Set your asking price in ARIA tokens"
-
-**List Button:**
-
-- Only enabled when BOTH name AND price are provided
-- Two-step process:
-  1. Approve marketplace contract (if needed)
-  2. List NFT with name and price
-- Loading states with clear progress indicators
-
-**User Benefits:**
-
-- 📝 **Custom naming** makes NFTs easily identifiable
-- 🔗 **IPFS transparency** builds buyer trust
-- ⚡ **Quick listing** in 2 clicks
-- 💡 **Smart defaults** reduce friction
+* For **shared ownership** and mass distribution.
+* This action opens the fractionalization modal to lock the NFT and create new QIE20 "share" tokens.
+* This is ideal for democratizing access to high-value assets (like property).
 
 ---
 
-### 6️⃣ **Step 6: NFT Listed on Marketplace with Name & Metadata**
+### 6️⃣ **Step 6: Fractionalization (The Form)**
+
+<p align="center">
+  <img src="./screenshots/fraction_form.png" alt="Fractionalization Form" width="100%">
+</p>
+
+**What's Shown:**
+
+If the user chooses "Option B," they are presented with a simple form to create their new fractional tokens:
+
+* **Total Supply**: The user decides how many "shares" to create (e.g., 10,000).
+* **Token Name**: Auto-generated from the NFT name (e.g., "Fractional Property Deed #5") but fully editable.
+* **Token Symbol**: Auto-generated (e.g., "F5") but fully editable.
+* **Preview**: A real-time preview of what their new fractional token will look like.
+
+**User Experience:**
+This flow guides the user through creating a new ERC20 token without needing to understand contract code. The `Fractionalize` button initiates a 2-step process: 1. Approve NFT Transfer, 2. Call `fractionalizeNFT` function.
+
+---
+
+### 7️⃣ **Step 7: Fractionalization Complete (Ready for QIEDEX)**
+
+<p align="center">
+  <img src="./screenshots/fraction_form.png" alt="Fractionalization Success" width="100%">
+</p>
+
+**Fractionalization Details:**
+
+Once the on-chain transaction is confirmed, the modal advances to a success screen showing:
+
+* **Confirmation**: "Successfully created 100 fractional tokens!"
+* **Token Details**: The new Token Address, Name, Symbol, and Supply.
+* The NFT is now securely locked in the `FractionalNFT.sol` contract.
+* The user's wallet has been minted the full supply of new QIE20 tokens.
+
+**🎯 Next Steps (Post-Fractionalization):**
+
+The modal provides direct, actionable "Next Steps" for the user:
+
+* **Add Token to Wallet**: A one-click button that uses the `wallet_watchAsset` method to add the new QIE20 token to their MetaMask, so they can see their balance.
+* **View on QIEDEX**: A direct link to the `QIEDEX` DEX, where they can immediately create a liquidity pool for their new tokens (e.g., `F-PROP1 / ARIA`).
+
+**Why This Matters:**
+This completes the entire DeFi loop. A.R.I.A. doesn't just mint an illiquid NFT; it provides the tools to create a liquid, tradeable ERC20 market for that asset on QIE's native DEX.
+
+---
+
+### 8️⃣ **Step 8: Marketplace (For Whole NFTs)**
 
 <p align="center">
   <img src="./screenshots/06-marketplace-with-names.png" alt="Marketplace with Named NFTs" width="100%">
@@ -312,69 +335,16 @@ After successful minting, users are presented with an intuitive listing form:
 
 **Enhanced Marketplace Display:**
 
-Each NFT card now shows comprehensive information:
+This is the market for users who chose **Option A**. Each NFT card shows comprehensive information:
 
-#### **Card Header:**
-
-- **Token Badge**: #6 (purple)
-- **Status Badge**: "For Sale" (green) or "Your NFT" (yellow)
-
-#### **Visual & Identity:**
-
-- **NFT Image** - Document thumbnail or default image
-- **Custom Name** - `🏠 Property Deed Mumbai Central` (example)
-  - Shows the exact name provided by seller
-  - Makes listings instantly recognizable
-
-#### **Metadata Access:**
-
-- **IPFS Link** - Clickable "View IPFS Metadata ↗" button
-  - Opens full metadata in new tab
-  - Displays complete AI analysis report
-  - Shows verification details and extracted data
-  - Builds transparency and trust
-
-#### **Description:**
-
-- Brief description from metadata
-- Truncated to 2 lines with ellipsis
-
-#### **Price Display:**
-
-- Large, prominent price box
-- Amount in ARIA tokens
-- Purple accent for visibility
-
-#### **Action Buttons:**
-
-**For Other Users' NFTs:**
-
-- **"Buy Now"** - Large teal button
-  - Enabled if sufficient ARIA balance
-  - Shows "Insufficient Balance" if not enough ARIA
-  - Loading state during purchase
-- **"Mint ARIA to Buy"** - Quick access to token minting
-
-**For Your Own NFTs:**
-
-- **"Your Listing"** - Disabled yellow button
-- Prevents accidental self-purchase
-
-#### **Seller Information:**
-
-- Truncated wallet address: `0x1234...5678`
-- Easy to copy/verify
-
-**Why This Matters:**
-
-- **Professional Display** - Looks like a real marketplace
-- **Informed Decisions** - Buyers can verify metadata before purchase
-- **Trust Building** - IPFS links prove authenticity
-- **Easy Discovery** - Custom names make NFTs searchable
-
+* **Custom Name**: `🏠 Property Deed Mumbai Central` (example)
+* **IPFS Link**: Clickable "View IPFS Metadata ↗" button
+* **Price Display**: Large, prominent price box in ARIA tokens
+* **Action Buttons**: "Buy Now", "Insufficient Balance", or "Your Listing"
+* **Seller Information**: Truncated wallet address
 ---
 
-### 7️⃣ **Step 7: Mint ARIA Tokens**
+### 7️⃣ **Step 9: Mint ARIA Tokens**
 
 <p align="center">
   <img src="./screenshots/06-mint-aria.png" alt="Mint ARIA Tokens Page" width="100%">
@@ -395,7 +365,7 @@ This establishes **ARIA** as the native utility token powering the ecosystem.
 
 ---
 
-### 8️⃣ **Step 8: Stake ARIA & Earn Rewards**
+### 8️⃣ **Step 10: Stake ARIA & Earn Rewards**
 
 <p align="center">
   <img src="./screenshots/07-staking-rewards.png" alt="ARIA Staking and Rewards Page" width="100%">
@@ -430,7 +400,24 @@ Staking transforms ARIA holders into active participants, decentralizing governa
 
 ## 🆕 Latest Features (Week 2 Update)
 
-### **Enhanced Marketplace Experience**
+### 1. Dual Liquidity Paths (List vs. Fractionalize)
+
+- **User Choice**: After minting, users can choose to sell their NFT whole (ERC721) on the marketplace OR fractionalize it into shares (ERC20).
+- **Smart Naming**: The custom name (`🏠 Property Deed #5`) is set once and used for both the marketplace listing *or* as the prefix for fractional tokens.
+- **Icon Integration**: Document type icons persist in names for easy identification.
+
+### 2. IPFS Metadata Transparency
+
+- **Clickable Links**: Every NFT card and fractional token (on QIEDEX) can link back to its immutable IPFS metadata.
+- **Direct Access**: Opens the full AI verification report in a new tab.
+- **Buyer Confidence**: Full transparency before any purchase (whole or fractional).
+- **Immutable Proof**: IPFS ensures the underlying asset data cannot be changed.
+
+### 3. Native Asset Fractionalization & DeFi Integration
+
+- **One-Click DeFi**: Users can fractionalize any verified NFT into QIE20 tokens directly from the UI.
+- **QIEDEX Integration**: The success modal links directly to QIEDEX, guiding users to create liquidity pools for their new fractional tokens.
+- **Wallet Integration**: Includes an "Add to Wallet" button (`wallet_watchAsset`) for a seamless UX, allowing users to immediately see their new tokens in MetaMask.
 
 #### **1. Custom NFT Naming System**
 
@@ -582,55 +569,51 @@ The listing process is designed for simplicity:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        USER INTERFACE                        │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌────────────┐│
-│  │ Document Type    │→ │ File Upload      │→ │ Analysis   ││
-│  │ Selector         │  │ (Drag & Drop)    │  │ Button     ││
-│  └──────────────────┘  └──────────────────┘  └────────────┘│
+│  ┌──────────────────┐  ┌──────────────────┐  ┌────────────┐ │
+│  │ Document Type    │→ │ File Upload      │→ │ Analysis   │ │
+│  │ Selector         │  │ (Drag & Drop)    │  │ Button     │ │
+│  └──────────────────┘  └──────────────────┘  └────────────┘ │
 └───────────────────────────────┬─────────────────────────────┘
                                 │
                                 ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                      BACKEND (Flask)                         │
+│                        BACKEND (Flask)                      │
 │  ┌──────────────────────────────────────────────────────┐  │
 │  │ 1. Receive: file + document_type + owner_address     │  │
 │  │ 2. Generate focused AI prompt based on type          │  │
 │  │ 3. Send to Gemini AI 2.5 Pro                         │  │
 │  │ 4. Scan for QR codes in document                     │  │
 │  │ 5. Parse and validate AI response                    │  │
-│  │ 6. Filter suspicious elements                        │  │
-│  │ 7. Return: txId, ipfs_link, document_metadata ← NEW  │  │
+│  │ 6. Upload metadata to IPFS (get hash)                │  │
+│  │ 7. Call AriaNFT contract’s mint function             │  │
+│  │ 8. Return: txId, ipfs_link, document_metadata        │  │
 │  └──────────────────────────────────────────────────────┘  │
 └───────────────────────────────┬─────────────────────────────┘
                                 │
                     ┌───────────┴───────────┐
                     ▼                       ▼
         ┌─────────────────────┐ ┌─────────────────────┐
-        │   IPFS (Pinata)     │ │  QIE Blockchain     │
+        │   IPFS (Pinata)     │ │   QIE Blockchain    │
         │                     │ │                     │
-        │ • Store metadata    │ │ • Mint NFT          │
-        │ • Generate hash     │ │ • Assign token ID   │
-        │ • Return IPFS URL ←─┼─│ • Store token URI   │
+        │ • Store metadata    │ │ • Mint NFT (ERC721) │
+        │ • Generate hash     │ │ • Store token URI   │
+        │ • Return IPFS URL   │ │ • Record token ID   │
         └─────────────────────┘ └─────────────────────┘
-                    │                       │
-                    └───────────┬───────────┘
-                                ▼
-                    ┌─────────────────────┐
-                    │  LISTING INTERFACE  │
-                    │                     │
-                    │ • Auto-name NFT ← NEW                │
-                    │ • Set price (ARIA)  │
-                    │ • Display IPFS link ← NEW            │
-                    └─────────────────────┘
                                 │
                                 ▼
-                    ┌─────────────────────┐
-                    │   MARKETPLACE       │
-                    │                     │
-                    │ • Show NFT name ← NEW                │
-                    │ • Display IPFS link ← NEW            │
-                    │ • Enable trading    │
-                    │ • Track ownership   │
-                    └─────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                    POST-MINT INTERFACE                      │
+│                      (Set Name, Choose Path)                │
+└──────────────┬──────────────────────────────────────────────┘
+               │
+   ┌───────────┴────────────┬────────────────────────┐
+   ▼                        ▼                        ▼
+┌─────────────────────┐ ┌─────────────────────┐ ┌─────────────────────┐
+│ MARKETPLACE CONTRACT│ │FRACTIONALNFT CONTRACT│ │      QIEDEX (DEX)  │
+│ (List/Sell ERC721)  │ │(Lock ERC721, Mint    │ │ (Trade ERC20        │
+│                     │ │  ERC20 Fractions)    │ │  Fractions)         │
+└─────────────────────┘ └─────────────────────┘ └─────────────────────┘
+
 ```
 
 ### **Technology Stack**
@@ -639,16 +622,10 @@ The listing process is designed for simplicity:
 
 - **Framework**: React 18 with Vite
 - **UI Library**: Chakra UI (dark theme customized)
-- **Animations**: Framer Motion for smooth transitions
 - **Blockchain**: Ethers.js v6 for Web3 interactions
-- **File Handling**: React Dropzone for drag-and-drop
+- **File Handling**: React Dropzone
 - **State Management**: React Hooks (useState, useEffect, useCallback)
 - **Routing**: React Router v6
-- **Enhanced Features**:
-  - Custom NFT naming system
-  - IPFS metadata display
-  - Smart default name generation
-  - Real-time marketplace updates
 
 #### **Backend**
 
@@ -664,7 +641,14 @@ The listing process is designed for simplicity:
 
 - **Language**: Solidity 0.8.20
 - **Standards**: ERC-721 (NFTs), ERC-20 (ARIA Token)
-- **Security**: OpenZeppelin contracts
+- **Security**: OpenZeppelin contracts, ReentrancyGuard
+- **Contracts**:
+  - `AriaNFT.sol`: The core RWA NFT (ERC721).
+  - `AriaToken.sol`: The utility token (ERC20).
+  - `Marketplace.sol`: For listing/selling whole NFTs.
+  - `Staking.sol`: For staking ARIA tokens.
+  - **`FractionalNFT.sol`**: Escrows the ERC721 and acts as a factory.
+  - **`FractionToken.sol`**: The new QIE20-compliant fractional token.
 - **Development**: Hardhat local network
 - **Deployment**: QIE Blockchain mainnet
 
@@ -673,8 +657,7 @@ The listing process is designed for simplicity:
 - **Blockchain**: QIE Network (25K+ TPS, ~3s finality)
 - **Storage**: IPFS (Pinata gateway)
 - **Wallet**: MetaMask / QIE Wallet integration
-- **Hosting**: Vercel (frontend), Railway (backend)
-
+- **Hosting**: Vercel (frontend), Render(backend)
 ---
 
 ## 🚀 Getting Started
@@ -835,7 +818,7 @@ Frontend will start on `http://localhost:5173`
 | IPFS Metadata Links | **✅ Yes** | Partial | ❌ No |
 | Smart Naming | **✅ Auto-generated** | Manual | Manual |
 | Open Source | **✅ Yes** | ❌ No | Partial |
-
+| Asset Fractionalization | **✅ Yes (Native)** | ❌ No | ❌ No |
 ---
 
 ## 🔮 Roadmap
@@ -854,9 +837,9 @@ Frontend will start on `http://localhost:5173`
 
 ### **🚧 Phase 2: DeFi Integration (In Progress - Week 2)**
 
-- [ ] QIEDEX token fractionalization
-- [ ] Asset-backed ERC-20 creation
-- [ ] Liquidity pool integration
+- [X] QIEDEX token fractionalization
+- [X] Asset-backed ERC-20 creation
+- [X] Liquidity pool integration
 - [ ] QIE oracle dynamic pricing
 - [ ] Automated market maker (AMM)
 
@@ -953,10 +936,10 @@ npm run test:e2e
 ### **Speed**
 
 - Document Upload: **<1 second**
-- AI Analysis: **2-5 seconds**
-- IPFS Upload: **1-2 seconds**
-- NFT Minting: **3 seconds** (QIE finality)
-- **Total Time**: **<10 seconds** start to finish
+- AI Analysis: **50-100 seconds**
+- IPFS Upload: **10-15 seconds**
+- NFT Minting: **10-15 seconds** (QIE finality)
+- **Total Time**: **<5 minutes** start to finish
 
 ### **Accuracy**
 
@@ -972,12 +955,6 @@ npm run test:e2e
 - AI Analysis: **$0.001** per document
 - **Total Cost**: **~$0.01** per RWA NFT
 
-### **Scalability**
-
-- Concurrent Users: **100+**
-- Documents per Day: **10,000+**
-- Storage Capacity: **Unlimited** (IPFS)
-- Blockchain TPS: **25,000+** (QIE)
 
 ---
 
@@ -997,7 +974,7 @@ npm run test:e2e
 
 **Bonus Integrations**:
 
-- 🔄 QIEDEX Token Creator (In Progress - Week 2)
+- ✅ QIEDEX Token Creator (In Progress - Week 2)
 - 🔄 QIE Oracles Integration (Planned - Week 3)
 - ✅ QIE Blockchain Deployment
 
@@ -1006,7 +983,7 @@ npm run test:e2e
 **Development Timeline**:
 
 - Week 1: Multi-document support, focused AI analysis ✅
-- Week 2: Custom naming, IPFS transparency, QIEDEX fractionalization 🚧
+- Week 2: Custom naming, IPFS transparency, QIEDEX fractionalization ✅
 - Week 3: QIE oracle integration 📅
 - Week 4: QIE mainnet deployment 📅
 - Week 5: Documentation & polish 📅
