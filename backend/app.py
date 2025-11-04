@@ -14,10 +14,13 @@ import pypdf
 import io
 from datetime import datetime
 import re
-
+from oracle_service import OracleService
+from web3 import Web3
+from contract_info import ARIAMARKETPLACE_ADDRESS, ARIAMARKETPLACE_ABI, ORACLE_ADDRESS
 # Import our blockchain service and QIEDEX service
 from blockchain_service import BlockchainService
 from qiedex_service import QIEDEXService
+import time
 
 load_dotenv()
 app = Flask(__name__)
@@ -374,6 +377,260 @@ def analyze_and_mint():
     except Exception as e:
         app.logger.error(f"Error in /analyze_and_mint: {e}", exc_info=True)
         return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+@app.route('/oracle/price/<path:pair>', methods=['GET'])
+def get_oracle_price(pair):
+
+    """
+    Get current oracle price for a trading pair
+    
+    Example: GET /oracle/price/ARIA/USD
+    Returns: {"pair": "ARIA/USD", "price": 0.50, "timestamp": 1234567890}
+    """
+    try:
+        price_data = OracleService.get_price_from_api(pair)
+        
+        if not price_data:
+            return jsonify({
+                "error": f"Price data not available for {pair}"
+            }), 404
+        
+        return jsonify({
+            "pair": price_data['pair'],
+            "price": price_data['price'],
+            "timestamp": price_data['timestamp'],
+            "decimals": price_data['decimals']
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching oracle price: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/oracle/nft-price/<int:token_id>', methods=['GET'])
+def get_nft_live_price(token_id):
+    """
+    Get live price for an NFT listing (considering oracle)
+
+    Example: GET /oracle/nft-price/5
+    Returns:
+    {
+        "tokenId": 5,
+        "staticPrice": 1000,
+        "currentPrice": 950.25,
+        "prices": {"USD": 475.12, "INR": 39594.00},
+        "oracleEnabled": true,
+        "useDynamicPricing": true,
+        "priceInUSD": 475.12
+    }
+    """
+    try:
+        w3 = Web3(Web3.HTTPProvider(os.getenv("QIE_RPC_URL", "http://127.0.0.1:8545/")))
+        marketplace = w3.eth.contract(address=ARIAMARKETPLACE_ADDRESS, abi=ARIAMARKETPLACE_ABI)
+
+        try:
+            # NEW contract returns 7 values
+            listing_details = marketplace.functions.getListingDetails(token_id).call()
+
+            (
+                seller,
+                static_price_wei,
+                current_price_wei,
+                name,
+                use_dynamic,
+                price_pair,
+                price_in_usd_e8
+            ) = listing_details
+
+            static_price_tokens = static_price_wei / 1e18
+            current_price_tokens = current_price_wei / 1e18
+
+            # If USD-pegged, USD value is authoritative from contract
+            if use_dynamic and price_in_usd_e8 > 0:
+                price_in_usd = price_in_usd_e8 / 1e8
+            else:
+                price_in_usd = None  # fallback later
+        
+        except Exception as e:
+            print(f"[Fallback listing] {e}")
+            listing = marketplace.functions.listings(token_id).call()
+            
+            seller = listing[0]
+            static_price_wei = listing[1]
+            static_price_tokens = static_price_wei / 1e18
+            current_price_tokens = static_price_tokens  # no oracle baseline
+            
+            use_dynamic = False
+            price_in_usd = None
+        
+        oracle_enabled = marketplace.functions.useOracle().call()
+
+        # Convert ARIA current → USD/INR/etc
+        prices = OracleService.get_nft_price_in_currencies(current_price_tokens)
+
+        # If price_in_usd was missing, fallback to computed USD
+        if price_in_usd is None:
+            price_in_usd = prices.get("USD", 0)
+
+        return jsonify({
+            "tokenId": token_id,
+            "staticPrice": static_price_tokens,
+            "currentPrice": current_price_tokens,
+            "prices": prices,
+            "oracleEnabled": oracle_enabled,
+            "useDynamicPricing": use_dynamic,
+            "priceInUSD": price_in_usd,
+            "name": name if 'name' in locals() else None,
+            "seller": seller
+        }), 200
+
+    except Exception as e:
+        print(f"Error fetching NFT live price: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+
+@app.route('/oracle/convert', methods=['POST'])
+def convert_currency():
+    """
+    Convert amount from one currency to another
+    
+    POST /oracle/convert
+    Body: {"amount": 1000, "from": "INR", "to": "USD"}
+    Returns: {"amount": 1000, "from": "INR", "to": "USD", "result": 12.00}
+    """
+    try:
+        data = request.get_json()
+        amount = float(data.get('amount', 0))
+        from_currency = data.get('from', 'USD')
+        to_currency = data.get('to', 'USD')
+        
+        if amount <= 0:
+            return jsonify({"error": "Amount must be positive"}), 400
+        
+        result = OracleService.convert_currency(amount, from_currency, to_currency)
+        
+        if result is None:
+            return jsonify({
+                "error": f"Cannot convert {from_currency} to {to_currency}"
+            }), 400
+        
+        return jsonify({
+            "amount": amount,
+            "from": from_currency,
+            "to": to_currency,
+            "result": result
+        }), 200
+        
+    except Exception as e:
+        print(f"Currency conversion error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/oracle/property-value', methods=['POST'])
+def update_property_value():
+    """
+    Update property value based on real estate index
+    
+    POST /oracle/property-value
+    Body: {"originalValue": 100000}
+    Returns: {"originalValue": 100000, "updatedValue": 105000, "multiplier": 1.05}
+    """
+    try:
+        data = request.get_json()
+        original_value = float(data.get('originalValue', 0))
+        
+        if original_value <= 0:
+            return jsonify({"error": "Value must be positive"}), 400
+        
+        updated_value = OracleService.apply_real_estate_multiplier(original_value)
+        multiplier = updated_value / original_value
+        
+        return jsonify({
+            "originalValue": original_value,
+            "updatedValue": updated_value,
+            "multiplier": multiplier,
+            "change": ((multiplier - 1) * 100)
+        }), 200
+        
+    except Exception as e:
+        print(f"Property value update error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/oracle/batch-prices', methods=['POST'])
+def get_batch_prices():
+    """
+    Get multiple oracle prices in one request
+    
+    POST /oracle/batch-prices
+    Body: {"pairs": ["ARIA/USD", "ETH/USD", "INR/USD"]}
+    Returns: {"prices": {"ARIA/USD": {...}, "ETH/USD": {...}}}
+    """
+    try:
+        data = request.get_json()
+        pairs = data.get('pairs', [])
+        
+        if not pairs:
+            return jsonify({"error": "No pairs specified"}), 400
+        
+        results = OracleService.get_live_prices_batch(pairs)
+        
+        return jsonify({
+            "prices": results,
+            "timestamp": int(time.time())
+        }), 200
+        
+    except Exception as e:
+        print(f"Batch price fetch error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/oracle/clear-cache', methods=['POST'])
+def clear_oracle_cache():
+    """
+    Clear the oracle price cache (force refresh)
+    
+    POST /oracle/clear-cache
+    Returns: {"message": "Cache cleared"}
+    """
+    try:
+        OracleService.clear_cache()
+        return jsonify({"message": "Oracle cache cleared successfully"}), 200
+    except Exception as e:
+        print(f"Cache clear error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/oracle/status', methods=['GET'])
+def oracle_status():
+    """
+    Get oracle service status and configuration
+    
+    GET /oracle/status
+    Returns: {
+        "enabled": true,
+        "cacheSize": 4,
+        "cacheTTL": 30,
+        "availablePairs": [...]
+    }
+    """
+    try:
+        return jsonify({
+            "enabled": True,
+            "cacheSize": len(OracleService.price_cache),
+            "cacheTTL": OracleService.CACHE_TTL,
+            "availablePairs": [
+                "ARIA/USD",
+                "ETH/USD",
+                "INR/USD",
+                "RE_INDEX"
+            ],
+            "provider": OracleService.PROVIDER_URL
+        }), 200
+    except Exception as e:
+        print(f"Status check error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/supported_documents', methods=['GET'])
 def get_supported_documents():

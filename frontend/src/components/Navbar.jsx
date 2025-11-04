@@ -1,6 +1,8 @@
 // src/components/Navbar.jsx
 import { NavLink } from 'react-router-dom';
-import { HStack, Link, useColorModeValue, Text, Tooltip } from '@chakra-ui/react';
+import { HStack, Link, useColorModeValue, Text, Tooltip, Icon } from '@chakra-ui/react';
+// Import an icon
+import { Activity } from 'lucide-react';
 
 const Navbar = () => {
   const activeLinkColor = useColorModeValue("purple.500", "purple.200");
@@ -27,6 +29,15 @@ const Navbar = () => {
       <Link as={NavLink} to="/mint-aria" style={({ isActive }) => isActive ? activeStyle : undefined} color={inactiveLinkColor}>
         Mint ARIA
       </Link>
+
+      {/* ADD THE NEW ORACLE LINK */}
+      <Link as={NavLink} to="/oracle" style={({ isActive }) => isActive ? activeStyle : undefined} color={inactiveLinkColor}>
+        <HStack spacing={1}>
+          <Icon as={Activity} boxSize={4} />
+          <Text>Oracle</Text>
+        </HStack>
+      </Link>
+      
       <Tooltip label="Coming Soon!" placement="bottom" hasArrow>
         <Text
           color={futureLinkColor}

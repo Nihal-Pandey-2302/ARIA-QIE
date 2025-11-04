@@ -8,7 +8,7 @@ import HomePage from './pages/HomePage';
 import StakingPage from './pages/StakingPage';
 import MarketplacePage from './pages/MarketplacePage';
 import MintAriaPage from './pages/MintAriaPage'; // ← Added
-
+import OracleDashboard from './pages/OracleDashboard';
 // Component Imports
 import Header from './components/Header';
 import Navbar from './components/Navbar';
@@ -184,6 +184,7 @@ function App() {
               )
             }
           />
+          <Route path="/oracle" element={<OracleDashboard />} />
         </Routes>
       </VStack>
     </Container>

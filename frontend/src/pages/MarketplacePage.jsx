@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
-import { 
-  Box, Button, Heading, Text, VStack, Spinner, SimpleGrid, Image, Badge, HStack, useToast, 
-  Link, Input, InputGroup, InputLeftElement, Icon
+import {
+  Box, Button, Heading, Text, VStack, Spinner, SimpleGrid, Image, Badge,
+  HStack, useToast, Link, Input, InputGroup, InputLeftElement
 } from '@chakra-ui/react';
 import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
 import { ExternalLink, Search } from 'lucide-react';
-import { 
-  MARKETPLACE_ADDRESS, MARKETPLACE_ABI, 
-  ARIA_NFT_ADDRESS, ARIA_NFT_ABI, 
-  ARIA_TOKEN_ADDRESS, ARIA_TOKEN_ABI, 
-  TOKEN_DISPLAY, TOKEN_DECIMALS 
+import {
+  MARKETPLACE_ADDRESS, MARKETPLACE_ABI,
+  ARIA_NFT_ADDRESS, ARIA_NFT_ABI,
+  ARIA_TOKEN_ADDRESS, ARIA_TOKEN_ABI,
+  TOKEN_DISPLAY, TOKEN_DECIMALS,
+  BACKEND_URL
 } from '../constants';
+import LivePriceDisplay from '../components/LivePriceDisplay';
+
+const E8 = 1e8;
 
 const MarketplacePage = ({ provider, account }) => {
   const [listings, setListings] = useState([]);
@@ -23,235 +27,232 @@ const MarketplacePage = ({ provider, account }) => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  // --- Fetch ARIA balance ---
   const fetchAriaBalance = async () => {
     if (!provider || !account) return;
     try {
-      const ariaTokenContract = new ethers.Contract(ARIA_TOKEN_ADDRESS, ARIA_TOKEN_ABI, provider);
-      const balance = await ariaTokenContract.balanceOf(account);
-      setAriaBalance(Number(balance) / 10 ** TOKEN_DECIMALS);
-      console.log("✅ ARIA Balance:", Number(balance) / 10 ** TOKEN_DECIMALS);
+      const ariaToken = new ethers.Contract(ARIA_TOKEN_ADDRESS, ARIA_TOKEN_ABI, provider);
+      const balance = await ariaToken.balanceOf(account);
+      setAriaBalance(Number(ethers.formatUnits(balance, TOKEN_DECIMALS)));
     } catch (err) {
-      console.error("Failed to fetch ARIA balance:", err);
+      console.error('Failed to fetch ARIA balance:', err);
     }
   };
 
-  // --- Fetch marketplace listings ---
+  const fetchLiveBackend = async (tokenId) => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/oracle/nft-price/${tokenId}`);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      console.warn('live price fetch failed', e);
+      return null;
+    }
+  };
+
   const fetchListings = async () => {
     if (!provider) return;
     setLoading(true);
-
     try {
-      const marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, provider);
-      const nftContract = new ethers.Contract(ARIA_NFT_ADDRESS, ARIA_NFT_ABI, provider);
+      const marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, provider);
+      const nft = new ethers.Contract(ARIA_NFT_ADDRESS, ARIA_NFT_ABI, provider);
 
       let total = 20n;
-      if (nftContract.tokenCounter) total = await nftContract.tokenCounter();
-      else if (nftContract.getLastTokenId) total = await nftContract.getLastTokenId();
+      try {
+        if (nft.tokenCounter) total = await nft.tokenCounter();
+        else if (nft.getLastTokenId) total = await nft.getLastTokenId();
+      } catch {
+        // keep fallback 20
+      }
 
       const items = [];
       for (let i = 1n; i <= total; i++) {
-        const listing = await marketplaceContract.listings(i);
-        if (!listing || listing.seller === ethers.ZeroAddress || listing.price === 0n) continue;
+        let seller = ethers.ZeroAddress;
+        let staticPriceWei = 0n;
+        let currentPriceWei = 0n;
+        let name = `NFT #${i}`;
+        let useDynamic = false;
+        let pair = 'ARIA/USD';
+        let priceInUSD_E8 = 0n;
 
-        const price = Number(listing.price) / 10 ** TOKEN_DECIMALS;
-        const listingName = listing.name || `NFT #${i}`;
-        
-        let metadata = {};
-        let ipfsLink = null;
-        
+        // Try v2 shape first
         try {
-          const tokenURI = await nftContract.tokenURI(i);
-          console.log(`NFT #${i} Raw tokenURI:`, tokenURI);
-          
-          // Handle different URI formats
-          if (tokenURI.startsWith("http")) {
-            // Full URL format
-            ipfsLink = tokenURI;
-            const res = await fetch(tokenURI);
-            if (res.ok) metadata = await res.json();
-          } else if (tokenURI.startsWith("ipfs://")) {
-            // IPFS protocol format
-            const ipfsHash = tokenURI.replace("ipfs://", "");
-            ipfsLink = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
-            const res = await fetch(ipfsLink);
-            if (res.ok) metadata = await res.json();
-          } else if (tokenURI.startsWith("Qm") || tokenURI.startsWith("bafy")) {
-            // Plain IPFS hash format (Qm... or bafy...)
-            ipfsLink = `https://gateway.pinata.cloud/ipfs/${tokenURI}`;
-            const res = await fetch(ipfsLink);
-            if (res.ok) metadata = await res.json();
+          const d = await marketplace.getListingDetails(i);
+          seller = d[0];
+          staticPriceWei = BigInt(d[1]);
+          currentPriceWei = BigInt(d[2]);
+          name = d[3];
+          useDynamic = Boolean(d[4]);
+          pair = d[5];
+          priceInUSD_E8 = BigInt(d[6]);
+        } catch (e) {
+          // Fallback to legacy
+          try {
+            const legacy = await marketplace.listings(i);
+            seller = legacy.seller ?? legacy[0];
+            staticPriceWei = BigInt(legacy.price ?? legacy[1] ?? 0n);
+            currentPriceWei = staticPriceWei;
+            name = legacy.name ?? `NFT #${i}`;
+            useDynamic = false;
+            pair = 'ARIA/USD';
+            priceInUSD_E8 = 0n;
+          } catch {
+            continue;
           }
-          
-          console.log(`NFT #${i} IPFS Link:`, ipfsLink);
-        } catch (err) {
-          console.warn(`⚠️ Failed to fetch metadata for token ${i}`, err);
         }
 
-        items.push({ 
-          tokenId: Number(i), 
-          price, 
-          seller: listing.seller, 
-          name: listingName,
+        if (!seller || seller === ethers.ZeroAddress) continue;
+        if (staticPriceWei === 0n && currentPriceWei === 0n && !useDynamic) continue;
+
+        let metadata = {};
+        let ipfsLink = null;
+        try {
+          const tokenURI = await nft.tokenURI(i);
+          let metadataUrl = tokenURI;
+          if (tokenURI.startsWith('ipfs://')) {
+            const ipfsHash = tokenURI.replace('ipfs://', '');
+            metadataUrl = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
+          } else if (tokenURI.startsWith('Qm') || tokenURI.startsWith('bafy')) {
+            metadataUrl = `https://gateway.pinata.cloud/ipfs/${tokenURI}`;
+          }
+          if (metadataUrl) {
+            ipfsLink = metadataUrl;
+            const res = await fetch(metadataUrl);
+            if (res.ok) metadata = await res.json();
+          }
+        } catch (err) {
+          console.warn(`metadata fetch failed for ${i}`, err);
+        }
+
+        // Compute friendly numbers
+        const staticAria = Number(ethers.formatUnits(staticPriceWei, TOKEN_DECIMALS));
+        const currentAria = Number(ethers.formatUnits(currentPriceWei, TOKEN_DECIMALS));
+        const usdTarget = Number(priceInUSD_E8) / E8;
+
+        // Pull backend live info (for USD-pegged baseline and multi-currency)
+        const live = await fetchLiveBackend(Number(i));
+        const liveAria = live?.currentPrice ?? (useDynamic ? currentAria : staticAria);
+        const displayUSD = useDynamic
+          ? (usdTarget || live?.priceInUSD || 0)
+          : (live?.priceInUSD || (staticAria * (live?.prices?.USD ?? 0) / (live?.prices?.ARIA ?? 1)) || 0);
+
+        items.push({
+          tokenId: Number(i),
+          seller,
+          name,
+          mode: useDynamic ? 'USD_PEGGED' : 'STATIC_ARIA',
+          staticAria,
+          currentAria: liveAria,
+          usdTarget,
+          pair,
           metadata,
-          ipfsLink
+          ipfsLink,
         });
       }
 
-      console.log("✅ Fetched listings:", items);
       setListings(items);
       setFilteredListings(items);
     } catch (err) {
-      console.error("❌ Error fetching listings:", err);
+      console.error('Error fetching listings:', err);
       toast({
-        title: "Failed to fetch listings",
-        description: err.message || "See console for details",
-        status: "error",
+        title: 'Failed to fetch listings',
+        description: err.message || 'See console for details',
+        status: 'error',
         duration: 5000,
-        isClosable: true,
+        isClosable: true
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Search filter ---
-  useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredListings(listings);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = listings.filter(listing => {
-      const nameMatch = listing.name?.toLowerCase().includes(query);
-      const tokenIdMatch = listing.tokenId.toString().includes(query);
-      const priceMatch = listing.price.toString().includes(query);
-      const descMatch = listing.metadata?.description?.toLowerCase().includes(query);
-      
-      return nameMatch || tokenIdMatch || priceMatch || descMatch;
-    });
-
-    setFilteredListings(filtered);
-  }, [searchQuery, listings]);
-
-  // --- Buy NFT using ARIA tokens ---
-  const handleBuy = async (tokenId, price, seller) => {
+  const handleBuy = async (tokenId, priceAria, seller) => {
     if (!provider) {
-      toast({
-        title: "Provider not available",
-        description: "Please ensure your wallet is connected",
-        status: "error",
-        duration: 3000,
-      });
+      toast({ title: 'Provider not available', description: 'Connect your wallet', status: 'error', duration: 3000 });
       return;
     }
-
     if (seller.toLowerCase() === account.toLowerCase()) {
-      toast({
-        title: "Cannot buy your own NFT",
-        status: "warning",
-        duration: 3000,
-      });
+      toast({ title: 'Cannot buy your own NFT', status: 'warning', duration: 3000 });
       return;
     }
-
-    if (ariaBalance < price) {
+    if (ariaBalance < priceAria) {
       toast({
-        title: "Insufficient ARIA balance",
-        description: `You need ${price} ARIA but only have ${ariaBalance.toFixed(2)} ARIA`,
-        status: "error",
-        duration: 5000,
+        title: 'Insufficient ARIA balance',
+        description: `You need ${priceAria} ARIA but only have ${ariaBalance.toFixed(2)} ARIA`,
+        status: 'error',
+        duration: 5000
       });
       return;
     }
 
     setPurchasing(tokenId);
-
     try {
       const signer = await provider.getSigner();
-      console.log("✅ Signer obtained:", await signer.getAddress());
+      const marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
+      const ariaToken = new ethers.Contract(ARIA_TOKEN_ADDRESS, ARIA_TOKEN_ABI, signer);
 
-      const marketplaceContract = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
-      const ariaTokenContract = new ethers.Contract(ARIA_TOKEN_ADDRESS, ARIA_TOKEN_ABI, signer);
+      const priceInWei = ethers.parseUnits(priceAria.toString(), TOKEN_DECIMALS);
 
-      const priceInWei = ethers.parseUnits(price.toString(), TOKEN_DECIMALS);
-      console.log("💰 Price in wei:", priceInWei.toString());
-
-      toast({
-        title: "Step 1/2: Approving ARIA tokens",
-        status: "info",
-        duration: null,
-        isClosable: false,
-      });
-
-      const approveTx = await ariaTokenContract.approve(MARKETPLACE_ADDRESS, priceInWei);
-      console.log("⏳ Approval tx sent:", approveTx.hash);
+      toast({ title: 'Step 1/2: Approving ARIA tokens', status: 'info', duration: null, isClosable: false });
+      const approveTx = await ariaToken.approve(MARKETPLACE_ADDRESS, priceInWei);
       await approveTx.wait();
-      console.log("✅ Approval confirmed");
-
       toast.closeAll();
 
-      toast({
-        title: "Step 2/2: Purchasing NFT",
-        status: "info",
-        duration: null,
-        isClosable: false,
-      });
-
-      const tx = await marketplaceContract.purchaseAsset(tokenId);
-      console.log("⏳ Purchase tx sent:", tx.hash);
+      toast({ title: 'Step 2/2: Purchasing NFT', status: 'info', duration: null, isClosable: false });
+      const tx = await marketplace.purchaseAsset(tokenId);
       await tx.wait();
-      console.log("✅ Purchase confirmed");
-
       toast.closeAll();
       toast({
-        title: "Purchase Successful! 🎉",
-        description: `You bought NFT #${tokenId} for ${price} ARIA`,
-        status: "success",
+        title: 'Purchase Successful! 🎉',
+        description: `You bought NFT #${tokenId} for ~${priceAria} ${TOKEN_DISPLAY}`,
+        status: 'success',
         duration: 5000,
-        isClosable: true,
+        isClosable: true
       });
 
       await fetchListings();
       await fetchAriaBalance();
-
     } catch (err) {
-      console.error("❌ Purchase error:", err);
+      console.error('Purchase error:', err);
       toast.closeAll();
-      
-      let errorMsg = "Transaction failed. See console for details.";
-      
-      if (err.message?.includes("user rejected")) {
-        errorMsg = "Transaction was rejected";
-      } else if (err.message?.includes("insufficient funds")) {
-        errorMsg = "Insufficient funds for gas";
-      } else if (err.reason) {
-        errorMsg = err.reason;
-      } else if (err.message) {
-        errorMsg = err.message;
-      }
-
       toast({
-        title: "Purchase Failed",
-        description: errorMsg,
-        status: "error",
+        title: 'Purchase Failed',
+        description: err.reason || err.message || 'Transaction failed',
+        status: 'error',
         duration: 7000,
-        isClosable: true,
+        isClosable: true
       });
     } finally {
       setPurchasing(null);
     }
   };
 
-  const handleMintAriaButton = () => {
-    navigate("/mint-aria");
-  };
+  const handleMintAriaButton = () => navigate('/mint-aria');
 
   useEffect(() => {
-    fetchListings();
-    fetchAriaBalance();
+    if (provider && account) {
+      fetchListings();
+      fetchAriaBalance();
+    }
   }, [provider, account]);
+
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredListings(listings);
+      return;
+    }
+    const q = searchQuery.toLowerCase();
+    const f = listings.filter((l) => {
+      const nameMatch = l.name?.toLowerCase().includes(q);
+      const idMatch = l.tokenId.toString().includes(q);
+      const priceMatch =
+        l.mode === 'USD_PEGGED'
+          ? l.usdTarget.toString().includes(q)
+          : l.staticAria.toString().includes(q);
+      const descMatch = l.metadata?.description?.toLowerCase().includes(q);
+      return nameMatch || idMatch || priceMatch || descMatch;
+    });
+    setFilteredListings(f);
+  }, [searchQuery, listings]);
 
   if (loading) {
     return (
@@ -266,35 +267,30 @@ const MarketplacePage = ({ provider, account }) => {
     <Box mt={2} p={6} shadow="lg" borderWidth="1px" borderRadius="xl" width="100%" bg="gray.800">
       <VStack spacing={4} mb={6}>
         <Heading as="h2" size="lg" textAlign="center">🎨 ARIA Marketplace</Heading>
-        
         <Text fontSize="sm" color="gray.400" textAlign="center" maxW="2xl">
-          Your ARIA Balance: <Text as="span" color={ariaBalance > 0 ? "green.400" : "red.400"} fontWeight="bold">
+          Your ARIA Balance:{' '}
+          <Text as="span" color={ariaBalance > 0 ? 'green.400' : 'red.400'} fontWeight="bold">
             {ariaBalance.toFixed(2)} {TOKEN_DISPLAY}
           </Text>
         </Text>
 
-        <HStack spacing={3} width="100%" maxW="2xl">
-          <Button onClick={handleMintAriaButton} colorScheme="orange" size="sm">
-            Mint ARIA Tokens
-          </Button>
-          <Button onClick={fetchListings} colorScheme="blue" size="sm">
-            Refresh Marketplace
-          </Button>
+        <HStack spacing={3} width="100%" maxW="2xl" justify="center">
+          <Button onClick={handleMintAriaButton} colorScheme="orange" size="sm">Mint ARIA Tokens</Button>
+          <Button onClick={fetchListings} colorScheme="blue" size="sm">Refresh Marketplace</Button>
         </HStack>
 
-        {/* Search Bar */}
         <InputGroup maxW="2xl" size="md">
           <InputLeftElement pointerEvents="none">
             <Search size={18} color="gray" />
           </InputLeftElement>
           <Input
-            placeholder="Search by name, token ID, price, or description..."
+            placeholder="Search by name, token ID, ARIA/ USD price, or description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             bg="gray.700"
             borderColor="gray.600"
-            _hover={{ borderColor: "gray.500" }}
-            _focus={{ borderColor: "blue.400", boxShadow: "0 0 0 1px #3182ce" }}
+            _hover={{ borderColor: 'gray.500' }}
+            _focus={{ borderColor: 'blue.400', boxShadow: '0 0 0 1px #3182ce' }}
           />
         </InputGroup>
 
@@ -314,48 +310,52 @@ const MarketplacePage = ({ provider, account }) => {
         </VStack>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
-          {filteredListings.map((listing) => {
-            const isOwnNFT = listing.seller.toLowerCase() === account.toLowerCase();
-            const canAfford = ariaBalance >= listing.price;
-            const isPurchasing = purchasing === listing.tokenId;
+          {filteredListings.map((l) => {
+            const isOwnNFT = l.seller.toLowerCase() === account.toLowerCase();
+            const effectiveAriaToPay = l.currentAria || l.staticAria || 0;
+            const canAfford = ariaBalance >= effectiveAriaToPay;
+            const isPurchasing = purchasing === l.tokenId;
 
             return (
-              <Box key={listing.tokenId} p={5} shadow="md" borderWidth="1px" borderRadius="md" bg="gray.700">
+              <Box key={l.tokenId} p={5} shadow="md" borderWidth="1px" borderRadius="md" bg="gray.700">
                 <VStack spacing={3} align="stretch">
                   <HStack justify="space-between" width="100%">
-                    <Badge colorScheme="purple">#{listing.tokenId}</Badge>
-                    <Badge colorScheme={isOwnNFT ? "yellow" : "green"}>
-                      {isOwnNFT ? "Your NFT" : "For Sale"}
-                    </Badge>
+                    <Badge colorScheme="purple">#{l.tokenId}</Badge>
+                    <HStack>
+                      <Badge colorScheme={l.mode === 'USD_PEGGED' ? 'blue' : 'purple'}>
+                        {l.mode === 'USD_PEGGED' ? 'USD-Pegged' : 'Static ARIA'}
+                      </Badge>
+                      <Badge colorScheme={isOwnNFT ? 'yellow' : 'green'}>
+                        {isOwnNFT ? 'Your NFT' : 'For Sale'}
+                      </Badge>
+                    </HStack>
                   </HStack>
 
                   <Image
-                    src={listing.metadata?.image || "https://i.postimg.cc/PJY2gmC0/LOGO.png"}
-                    alt={listing.name}
+                    src={l.metadata?.image || 'https://i.postimg.cc/PJY2gmC0/LOGO.png'}
+                    alt={l.name}
                     borderRadius="md"
                     boxSize="200px"
                     objectFit="cover"
                     fallbackSrc="https://i.postimg.cc/PJY2gmC0/LOGO.png"
                   />
 
-                  <Heading size="md" noOfLines={1}>{listing.name}</Heading>
-                  
+                  <Heading size="md" noOfLines={1}>{l.name}</Heading>
                   <Text fontSize="sm" color="gray.400" noOfLines={2}>
-                    {listing.metadata?.description || "AI-Verified Asset"}
+                    {l.metadata?.description || 'AI-Verified Asset'}
                   </Text>
 
-                  {/* IPFS Link - Now with better styling and visibility */}
-                  {listing.ipfsLink && (
-                    <Link 
-                      href={listing.ipfsLink} 
-                      isExternal 
+                  {l.ipfsLink ? (
+                    <Link
+                      href={l.ipfsLink}
+                      isExternal
                       color="cyan.300"
                       fontSize="sm"
                       fontWeight="medium"
                       display="flex"
                       alignItems="center"
                       gap={1}
-                      _hover={{ color: "cyan.200", textDecoration: "underline" }}
+                      _hover={{ color: 'cyan.200', textDecoration: 'underline' }}
                       bg="gray.800"
                       px={3}
                       py={2}
@@ -365,59 +365,68 @@ const MarketplacePage = ({ provider, account }) => {
                       <ExternalLink size={14} />
                       View IPFS Metadata
                     </Link>
-                  )}
-
-                  {/* Show message if IPFS link is missing */}
-                  {!listing.ipfsLink && (
+                  ) : (
                     <Text fontSize="xs" color="gray.500" textAlign="center" fontStyle="italic">
                       IPFS metadata unavailable
                     </Text>
                   )}
 
+                  {/* Pricing box */}
                   <Box bg="gray.800" p={3} borderRadius="md" width="100%">
-                    <Text fontSize="xs" color="gray.400">Price</Text>
-                    <Text fontWeight="bold" fontSize="lg" color="purple.300">
-                      {listing.price} {TOKEN_DISPLAY}
-                    </Text>
+                    {l.mode === 'USD_PEGGED' ? (
+                      <>
+                        <Text fontSize="xs" color="gray.400">Target Price</Text>
+                        <Text fontWeight="bold" fontSize="lg" color="blue.300">
+                          ${l.usdTarget?.toFixed(2)} USD <Text as="span" color="gray.400" fontSize="sm"> (paid in {TOKEN_DISPLAY})</Text>
+                        </Text>
+                        <Text fontSize="xs" color="gray.500" mt={1}>
+                          Live ARIA required updates via oracle at purchase.
+                        </Text>
+                      </>
+                    ) : (
+                      <>
+                        <Text fontSize="xs" color="gray.400">List Price</Text>
+                        <Text fontWeight="bold" fontSize="lg" color="purple.300">
+                          {l.staticAria} {TOKEN_DISPLAY}
+                        </Text>
+                      </>
+                    )}
                   </Box>
+
+                  {/* Live price: baseline = current ARIA now (good for USD mode), or static ARIA for static mode */}
+                  <LivePriceDisplay
+                    tokenId={l.tokenId}
+                    staticPrice={l.mode === 'USD_PEGGED' ? (l.currentAria || 0) : (l.staticAria || 0)}
+                    showMultiCurrency={false}
+                  />
 
                   {!isOwnNFT && (
                     <Button
                       colorScheme="teal"
                       size="sm"
                       width="100%"
-                      onClick={() => handleBuy(listing.tokenId, listing.price, listing.seller)}
-                      isDisabled={!canAfford || isPurchasing}
+                      onClick={() => handleBuy(l.tokenId, effectiveAriaToPay, l.seller)}
+                      isDisabled={!canAfford || isPurchasing || effectiveAriaToPay <= 0}
                       isLoading={isPurchasing}
                     >
-                      {isPurchasing ? "Purchasing..." : canAfford ? "Buy Now" : "Insufficient Balance"}
+                      {isPurchasing ? 'Purchasing...' : canAfford ? 'Buy Now' : 'Insufficient Balance'}
                     </Button>
                   )}
 
                   {isOwnNFT && (
-                    <Button
-                      colorScheme="yellow"
-                      size="sm"
-                      width="100%"
-                      isDisabled
-                    >
+                    <Button colorScheme="yellow" size="sm" width="100%" isDisabled>
                       Your Listing
                     </Button>
                   )}
 
                   {!canAfford && !isOwnNFT && (
-                    <Button
-                      colorScheme="orange"
-                      size="xs"
-                      width="100%"
-                      onClick={handleMintAriaButton}
-                    >
+                    <Button colorScheme="orange" size="xs" width="100%" onClick={handleMintAriaButton}>
                       Mint ARIA to Buy
                     </Button>
                   )}
 
                   <Text fontSize="xs" color="gray.500" textAlign="center">
-                    Seller: {listing.seller.slice(0, 6)}...{listing.seller.slice(-4)}
+                    Seller: {l.seller.slice(0, 6)}...{l.seller.slice(-4)}
                   </Text>
                 </VStack>
               </Box>

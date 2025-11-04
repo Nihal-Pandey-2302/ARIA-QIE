@@ -1,0 +1,167 @@
+| Feature                            | Data from Oracle                                          | Where to Show                                                     | Description                                                                                      |
+| ---------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **1. Global Price Ticker**         | `/oracle/price/ARIA/USD` + others                         | 🔝 *Header bar or Navbar*                                         | Show “LIVE: $0.50 /ARIA” with pulse animation. Auto-updates every 10–20s.                        |
+| **2. NFT Live Value**              | `/oracle/nft-price/:tokenId`                              | 🖼 *On each NFT card in Marketplace*                              | Each NFT displays its current value (in USD / ETH / INR) fetched from oracle. Useful for buyers. |
+| **3. Portfolio Dashboard**         | `/oracle/property-value` or `/oracle/convert`             | 📊 *New ‘Portfolio’ page*                                         | Show total NFT portfolio value in multiple currencies using live oracle data.                    |
+| **4. Oracle Status Widget**        | `/oracle/status`                                          | ⚙️ *New “Oracle Monitor” page*                                    | Display provider name, uptime, cache TTL, and live ping status. Great for developers/admins.     |
+| **5. Currency Converter**          | `/oracle/convert`                                         | 💱 *Add a “Converter” widget anywhere (maybe in Staking or Mint)* | Convert between ARIA, USD, INR, ETH directly using live oracle feeds.                            |
+| **6. Market Trends (Coming Soon)** | Price delta over time (store locally in frontend for now) | 📈 *In LivePriceDisplay or a dashboard page*                      | Show a small sparkline graph of last 10 price updates to visualize volatility.                   |
+
+// src/components/Navbar.jsx
+import { NavLink } from 'react-router-dom';
+import { HStack, Link, useColorModeValue, Text, Tooltip } from '@chakra-ui/react';
+
+const Navbar = () => {
+  const activeLinkColor = useColorModeValue("purple.500", "purple.200");
+  const inactiveLinkColor = useColorModeValue("gray.600", "gray.400");
+  const futureLinkColor = useColorModeValue("gray.400", "gray.600");
+
+  const activeStyle = {
+    fontWeight: 'bold',
+    color: activeLinkColor,
+    textDecoration: 'underline',
+  };
+
+  return (
+    <HStack as="nav" spacing={8} justify="center" mb={8} fontSize="lg">
+      <Link as={NavLink} to="/" style={({ isActive }) => isActive ? activeStyle : undefined} color={inactiveLinkColor}>
+        Mint RWA
+      </Link>
+      <Link as={NavLink} to="/marketplace" style={({ isActive }) => isActive ? activeStyle : undefined} color={inactiveLinkColor}>
+        Marketplace
+      </Link>
+      <Link as={NavLink} to="/staking" style={({ isActive }) => isActive ? activeStyle : undefined} color={inactiveLinkColor}>
+        Staking
+      </Link>
+      <Link as={NavLink} to="/mint-aria" style={({ isActive }) => isActive ? activeStyle : undefined} color={inactiveLinkColor}>
+        Mint ARIA
+      </Link>
+      <Tooltip label="Coming Soon!" placement="bottom" hasArrow>
+        <Text
+          color={futureLinkColor}
+          cursor="not-allowed"
+          _hover={{ textDecoration: 'none' }}
+        >
+          Governance
+        </Text>
+      </Tooltip>
+    </HStack>
+  );
+};
+
+export default Navbar;
+Add this path to navbar
+Also then add then live price to marketplace return
+' ' '
+return (
+              <Box key={listing.tokenId} p={5} shadow="md" borderWidth="1px" borderRadius="md" bg="gray.700">
+                <VStack spacing={3} align="stretch">
+                  <HStack justify="space-between" width="100%">
+                    <Badge colorScheme="purple">#{listing.tokenId}</Badge>
+                    <Badge colorScheme={isOwnNFT ? "yellow" : "green"}>
+                      {isOwnNFT ? "Your NFT" : "For Sale"}
+                    </Badge>
+                  </HStack>
+
+                  <Image
+                    src={listing.metadata?.image || "https://i.postimg.cc/PJY2gmC0/LOGO.png"}
+                    alt={listing.name}
+                    borderRadius="md"
+                    boxSize="200px"
+                    objectFit="cover"
+                    fallbackSrc="https://i.postimg.cc/PJY2gmC0/LOGO.png"
+                  />
+
+                  <Heading size="md" noOfLines={1}>{listing.name}</Heading>
+                  
+                  <Text fontSize="sm" color="gray.400" noOfLines={2}>
+                    {listing.metadata?.description || "AI-Verified Asset"}
+                  </Text>
+
+                  {/* IPFS Link - Now with better styling and visibility */}
+                  {listing.ipfsLink && (
+                    <Link 
+                      href={listing.ipfsLink} 
+                      isExternal 
+                      color="cyan.300"
+                      fontSize="sm"
+                      fontWeight="medium"
+                      display="flex"
+                      alignItems="center"
+                      gap={1}
+                      _hover={{ color: "cyan.200", textDecoration: "underline" }}
+                      bg="gray.800"
+                      px={3}
+                      py={2}
+                      borderRadius="md"
+                      justifyContent="center"
+                    >
+                      <ExternalLink size={14} />
+                      View IPFS Metadata
+                    </Link>
+                  )}
+
+                  {/* Show message if IPFS link is missing */}
+                  {!listing.ipfsLink && (
+                    <Text fontSize="xs" color="gray.500" textAlign="center" fontStyle="italic">
+                      IPFS metadata unavailable
+                    </Text>
+                  )}
+
+                  <Box bg="gray.800" p={3} borderRadius="md" width="100%">
+                    <Text fontSize="xs" color="gray.400">Price</Text>
+                    <Text fontWeight="bold" fontSize="lg" color="purple.300">
+                      {listing.price} {TOKEN_DISPLAY}
+                    </Text>
+                  </Box>
+
+                  {!isOwnNFT && (
+                    <Button
+                      colorScheme="teal"
+                      size="sm"
+                      width="100%"
+                      onClick={() => handleBuy(listing.tokenId, listing.price, listing.seller)}
+                      isDisabled={!canAfford || isPurchasing}
+                      isLoading={isPurchasing}
+                    >
+                      {isPurchasing ? "Purchasing..." : canAfford ? "Buy Now" : "Insufficient Balance"}
+                    </Button>
+                  )}
+
+                  {isOwnNFT && (
+                    <Button
+                      colorScheme="yellow"
+                      size="sm"
+                      width="100%"
+                      isDisabled
+                    >
+                      Your Listing
+                    </Button>
+                  )}
+
+                  {!canAfford && !isOwnNFT && (
+                    <Button
+                      colorScheme="orange"
+                      size="xs"
+                      width="100%"
+                      onClick={handleMintAriaButton}
+                    >
+                      Mint ARIA to Buy
+                    </Button>
+                  )}
+
+                  <Text fontSize="xs" color="gray.500" textAlign="center">
+                    Seller: {listing.seller.slice(0, 6)}...{listing.seller.slice(-4)}
+                  </Text>
+                </VStack>
+              </Box>
+            );
+          })}
+        </SimpleGrid>
+      )}
+    </Box>
+  );
+};
+
+export default MarketplacePage;
+'  ''
