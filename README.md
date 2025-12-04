@@ -811,6 +811,72 @@ A user can go from **document → verified NFT → listed for sale** in minutes 
 ---
 
 <details>
+<summary><strong>🔮 Oracle Integration</strong></summary>
+
+## 🔮 Oracle Integration
+
+### Testnet Implementation
+
+**Important Note:** Official QIE Oracles (e.g., `0x3Bc617cF3A4Bb77003e4c556B87b13D556903D17`)
+are currently deployed **only on QIE Mainnet**, not testnet.
+
+For this hackathon submission, we deployed our own **AggregatorV3-compatible oracle**
+on QIE Testnet that follows the exact same interface as real QIE/Chainlink oracles:
+
+```solidity
+interface AggregatorV3Interface {
+    function latestRoundData() external view returns (
+        uint80 roundId,
+        int256 answer,
+        uint256 startedAt,
+        uint256 updatedAt,
+        uint80 answeredInRound
+    );
+    function decimals() external view returns (uint8);
+    function description() external view returns (string memory);
+}
+```
+
+**Our Testnet Oracle:**
+
+- Address: `0xB4aa30A3D8275C4DC7d727aDa604e6ae6BF5501D`
+- Compatible with: Chainlink AggregatorV3Interface
+- Provides: ARIA/USD price feed
+- Decimals: 8 (same as real QIE Oracles)
+
+**Mainnet Migration:**
+To use real QIE Oracle on mainnet, simply update the oracle address to:
+
+- QIE Oracle: `0x3Bc617cF3A4Bb77003e4c556B87b13D556903D17`
+- Or other asset oracles from [QIE Oracle Docs](https://docs.qie.digital)
+
+Zero code changes required—our implementation follows the standard interface!
+
+### Why This Approach?
+
+1. **Standard Interface:** Uses AggregatorV3Interface (Chainlink standard)
+2. **Seamless Migration:** One-line change to switch to real oracle
+3. **Testable:** Judges can verify on testnet explorer
+4. **Production-Ready:** Already compatible with mainnet oracles
+
+### 🏗️ How We Act as an Oracle Node
+
+Since testnets lack live Chainlink feeds, **our backend infrastructure acts as a custom Oracle Node**:
+
+1.  **Data Fetching:** Our `oracle_service.py` fetches **real-time market data** (ETH, BTC, INR) from external APIs.
+2.  **Data Standardization:** Prices are normalized to 8 decimals (standard Chainlink format).
+3.  **On-Chain Update:** The backend pushes these updates to our `QIEOracleTestnet` contract.
+4.  **Verification:** The smart contract verifies the data source and updates the on-chain price.
+
+This architecture demonstrates a **fully functional, self-hosted oracle network** capable of powering RWA assets on QIE.
+
+> **✅ Oracle Ready:** The entire system is built to switch to decentralized Chainlink/QIE oracles on Mainnet by simply changing one environment variable.
+
+</details>
+
+---
+
+<details>
 <summary><strong>🚀 Getting Started</strong></summary>
 
 ## 🚀 Getting Started

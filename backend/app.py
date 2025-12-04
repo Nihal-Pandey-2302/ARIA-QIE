@@ -402,7 +402,7 @@ def get_oracle_price(pair):
     Returns: {"pair": "ARIA/USD", "price": 0.50, "timestamp": 1234567890}
     """
     try:
-        price_data = OracleService.get_price_from_api(pair)
+        price_data = OracleService.get_price_from_oracle(pair)
         
         if not price_data:
             return jsonify({

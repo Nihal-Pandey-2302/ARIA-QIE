@@ -136,7 +136,7 @@ const OracleDashboard = () => {
                 <Stat>
                   <StatLabel color="gray.400">ARIA / USD</StatLabel>
                   <StatNumber fontSize="4xl" fontWeight="bold">
-                    {price !== null ? `$${price.toFixed(2)}` : <Spinner size="sm" color="purple.500" />}
+                    {price != null && !isNaN(price) ? `$${Number(price).toFixed(2)}` : <Spinner size="sm" color="purple.500" />}
                   </StatNumber>
                   <StatHelpText>
                     <StatArrow type="increase" />

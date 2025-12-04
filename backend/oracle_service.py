@@ -6,61 +6,150 @@ Handles oracle price feeds and updates for dynamic NFT pricing
 
 import time
 from typing import Dict, Optional, Tuple
+import os
+from web3 import Web3
 
 class OracleService:
-    """Service for interacting with QIE Oracle network"""
+    """Service for QIE Oracle (AggregatorV3 compatible)"""
     
-    # Price cache to reduce API calls
+    # Oracle config from environment
+    ORACLE_ADDRESS = os.getenv("QIE_ORACLE_ADDRESS", "")
+    PROVIDER_URL = os.getenv("QIE_RPC_URL", "https://rpc-main1.qiblockchain.online/")
+    
+    # Price cache
     price_cache: Dict[str, Dict] = {}
-    CACHE_TTL = 30  # seconds
-    PROVIDER_URL = "https://mock.qie-oracle.local"
-    # Mock prices (replace with real QIE oracle API in production)
-    MOCK_PRICES = {
-        "ARIA/USD": {"price": 0.50, "decimals": 8},
-        "ETH/USD": {"price": 2000.00, "decimals": 8},
-        "INR/USD": {"price": 0.012, "decimals": 8},
-        "RE_INDEX": {"price": 1.05, "decimals": 8},  # Real estate index
-    }
+    CACHE_TTL = 30
+    
+    # Initialize Web3
+    w3 = Web3(Web3.HTTPProvider(PROVIDER_URL))
+    
+    # ✅ AggregatorV3Interface ABI (standard Chainlink interface)
+    ORACLE_ABI = [
+        {
+            "inputs": [],
+            "name": "latestRoundData",
+            "outputs": [
+                {"name": "roundId", "type": "uint80"},
+                {"name": "answer", "type": "int256"},
+                {"name": "startedAt", "type": "uint256"},
+                {"name": "updatedAt", "type": "uint256"},
+                {"name": "answeredInRound", "type": "uint80"}
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "decimals",
+            "outputs": [{"name": "", "type": "uint8"}],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "description",
+            "outputs": [{"name": "", "type": "string"}],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ]
     
     @classmethod
-    def get_price_from_api(cls, pair: str) -> Optional[Dict]:
-        """
-        Fetch price from QIE Oracle API
+    def get_oracle_contract(cls):
+        """Get oracle contract instance"""
+        if not cls.ORACLE_ADDRESS or cls.ORACLE_ADDRESS == "":
+            print("⚠️ Oracle address not set")
+            return None
         
-        Args:
-            pair: Trading pair (e.g., "ARIA/USD", "ETH/USD")
-            
-        Returns:
-            Dict with price, timestamp, or None if failed
-        """
         try:
-            # Check cache first
-            if pair in cls.price_cache:
-                cached = cls.price_cache[pair]
-                if time.time() - cached['fetched_at'] < cls.CACHE_TTL:
-                    return cached
-            
-            # Get mock price
-            if pair not in cls.MOCK_PRICES:
-                print(f"⚠️ Price pair {pair} not found in mock data")
+            if not cls.w3.is_connected():
+                print("❌ Failed to connect to QIE RPC")
                 return None
             
-            price_data = {
-                "pair": pair,
-                "price": cls.MOCK_PRICES[pair]["price"],
-                "decimals": cls.MOCK_PRICES[pair]["decimals"],
-                "timestamp": int(time.time()),
-                "fetched_at": time.time()
-            }
-            
-            # Cache the result
-            cls.price_cache[pair] = price_data
-            
-            return price_data
-            
+            return cls.w3.eth.contract(
+                address=Web3.to_checksum_address(cls.ORACLE_ADDRESS),
+                abi=cls.ORACLE_ABI
+            )
         except Exception as e:
-            print(f"❌ Error fetching oracle price for {pair}: {e}")
+            print(f"❌ Failed to connect to oracle: {e}")
             return None
+    
+    @classmethod
+    def get_price_from_oracle(cls, pair: str = "ARIA/USD") -> Optional[Dict]:
+        """
+        Fetch price from QIE Oracle (AggregatorV3 compatible)
+        Falls back to mock if unavailable
+        """
+        # Check cache
+        if pair in cls.price_cache:
+            cached = cls.price_cache[pair]
+            if time.time() - cached['fetched_at'] < cls.CACHE_TTL:
+                print(f"📦 Cache hit for {pair}")
+                return cached
+        
+        # Try real oracle (Only for ARIA/USD since we only deployed one)
+        if pair == "ARIA/USD":
+            oracle = cls.get_oracle_contract()
+            if oracle:
+                try:
+                    print(f"🔮 Fetching {pair} from QIE Oracle...")
+                    
+                    # Call latestRoundData() - standard AggregatorV3 function
+                    (roundId, answer, startedAt, updatedAt, answeredInRound) = \
+                        oracle.functions.latestRoundData().call()
+                    
+                    # Get decimals
+                    decimals = oracle.functions.decimals().call()
+                    
+                    # Convert to float
+                    price_float = answer / (10 ** decimals)
+                    
+                    price_data = {
+                        "pair": pair,
+                        "price": price_float,
+                        "decimals": decimals,
+                        "timestamp": updatedAt,
+                        "roundId": roundId,
+                        "fetched_at": time.time(),
+                        "source": "QIE Oracle (AggregatorV3)"
+                    }
+                    
+                    cls.price_cache[pair] = price_data
+                    print(f"✅ Got {pair}: ${price_float} (Round {roundId})")
+                    return price_data
+                    
+                except Exception as e:
+                    print(f"⚠️ Oracle fetch failed: {e}")
+                    print("   Falling back to mock prices...")
+        
+        return cls.get_mock_price(pair)
+    
+    @classmethod
+    def get_mock_price(cls, pair: str) -> Optional[Dict]:
+        """Fallback mock prices"""
+        mock_prices = {
+            "ARIA/USD": 0.50,     # Our Testnet Oracle Price
+            "QIE/USD": 0.10,      # QIE Price
+            "ETH/USD": 3193.79,   # Real ETH Price (Dec 2025)
+            "BTC/USD": 91416.39,  # Real BTC Price (Dec 2025)
+            "INR/USD": 0.0111,    # Real INR Rate (~90 INR/USD)
+            "RE_INDEX": 1.05,
+        }
+        
+        if pair not in mock_prices:
+            return None
+        
+        price_data = {
+            "pair": pair,
+            "price": mock_prices[pair],
+            "decimals": 8,
+            "timestamp": int(time.time()),
+            "fetched_at": time.time(),
+            "source": "Mock Fallback"
+        }
+        
+        cls.price_cache[pair] = price_data
+        return price_data
     
     @classmethod
     def get_price_scaled(cls, pair: str) -> Tuple[Optional[int], Optional[int]]:
@@ -73,12 +162,23 @@ class OracleService:
         Returns:
             (scaled_price, timestamp) or (None, None)
         """
-        data = cls.get_price_from_api(pair)
+        data = cls.get_price_from_oracle(pair) # Changed to use new oracle method
         if not data:
             return None, None
         
         # Scale to 8 decimals for blockchain
-        scaled_price = int(data['price'] * (10 ** 8))
+        # Use the 'decimals' from the oracle data if available, otherwise default to 8
+        target_decimals = 8
+        current_decimals = data.get('decimals', target_decimals)
+        
+        # Adjust scaling if the oracle provides different decimals
+        if current_decimals != target_decimals:
+            # First, normalize to 1 unit, then scale to target_decimals
+            price_normalized = data['price'] / (10 ** current_decimals)
+            scaled_price = int(price_normalized * (10 ** target_decimals))
+        else:
+            scaled_price = int(data['price'] * (10 ** target_decimals))
+
         timestamp = data['timestamp']
         
         return scaled_price, timestamp
@@ -92,21 +192,21 @@ class OracleService:
             
             # If converting TO USD directly
             if to_currency == "USD":
-                from_data = cls.get_price_from_api(f"{from_currency}/USD")
+                from_data = cls.get_price_from_oracle(f"{from_currency}/USD")
                 if not from_data:
                     return None
                 return amount * from_data["price"]
             
             # If converting FROM USD directly
             if from_currency == "USD":
-                to_data = cls.get_price_from_api(f"{to_currency}/USD")
+                to_data = cls.get_price_from_oracle(f"{to_currency}/USD")
                 if not to_data:
                     return None
                 return amount / to_data["price"]
             
             # Normal case: via USD intermediary
-            from_data = cls.get_price_from_api(f"{from_currency}/USD")
-            to_data = cls.get_price_from_api(f"{to_currency}/USD")
+            from_data = cls.get_price_from_oracle(f"{from_currency}/USD")
+            to_data = cls.get_price_from_oracle(f"{to_currency}/USD")
             
             if not from_data or not to_data:
                 return None
@@ -125,7 +225,7 @@ class OracleService:
         """
         try:
             # Get ARIA/USD rate
-            aria_usd_data = cls.get_price_from_api("ARIA/USD")
+            aria_usd_data = cls.get_price_from_oracle("ARIA/USD")
             if not aria_usd_data:
                 return {"ARIA": aria_price}
             
@@ -138,12 +238,12 @@ class OracleService:
             }
             
             # Add INR if available
-            inr_usd_data = cls.get_price_from_api("INR/USD")
+            inr_usd_data = cls.get_price_from_oracle("INR/USD")
             if inr_usd_data:
                 prices["INR"] = usd_price / inr_usd_data['price']
             
             # Add ETH if available
-            eth_usd_data = cls.get_price_from_api("ETH/USD")
+            eth_usd_data = cls.get_price_from_oracle("ETH/USD")
             if eth_usd_data:
                 prices["ETH"] = usd_price / eth_usd_data['price']
             
@@ -159,7 +259,7 @@ class OracleService:
         Apply real estate market index to property values
         """
         try:
-            re_index_data = cls.get_price_from_api("RE_INDEX")
+            re_index_data = cls.get_price_from_oracle("RE_INDEX")
             if not re_index_data:
                 return original_value
             
@@ -179,7 +279,7 @@ class OracleService:
         """
         results = {}
         for pair in pairs:
-            data = cls.get_price_from_api(pair)
+            data = cls.get_price_from_oracle(pair)
             if data:
                 results[pair] = data
         
