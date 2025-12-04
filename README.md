@@ -75,7 +75,8 @@ Support for **8+ document types** with automatic AI classification and focused a
 - Instant NFT minting
 - **🪙 Built-in Fractionalization** - Instantly split any RWA NFT into QIE20 tokens
 - **🛒 Built-in Marketplace** - For trading whole (ERC721) assets
-- **🔗 QIEDEX Integration** - For trading fractional (ERC20) assets
+- **🔗 QIEDEX Integration** - Direct liquidity pool creation for fractional assets
+- **⚖️ Governance & Disputes** - Community-driven fraud detection and asset flagging
 - **💰 Staking Rewards System** - Earn fees from the protocol
 
 ---
@@ -183,7 +184,7 @@ Clear progress indicators and detailed information build trust in the process. U
   - High confidence indicates reliable extraction
 
 #### **📋 Verification Summary:**
->
+
 > "The document contains two valid and consistent invoices for a single Amazon order. All authenticity markers are present, including digital signatures and tax IDs, and mathematical calculations are correct. The documents are deemed authentic."
 
 #### **📊 Extracted Data:**
@@ -203,7 +204,7 @@ All key information automatically extracted:
       "quantity": 1,
       "total_price": "₹999.00",
       "unit_price": "₹846.61"
-    },
+    }
     // Shipping & COD fees included
   ]
   ```
@@ -223,10 +224,11 @@ All key information automatically extracted:
 - ✅ Authorized Signatory Stamp
 
 **Quality Assessment:**
+
 > "High-quality document with clear, machine-readable text and professional formatting."
 
 #### **📝 Extraction Notes:**
->
+
 > "The provided document consists of two separate invoices (BLR8-658 from NOGUILT FITNESS... and POD-26-76538752 from Amazon Seller Services...) for a single order. The extracted data has been consolidated."
 
 #### **QR Code Verification:**
@@ -278,12 +280,11 @@ After successful minting, the user is given two powerful, distinct options for t
   - IPFS verification report link
   - Live ARIA price if USD-pegged
 
-
 **Option B: Fractionalize**
 
-* For **shared ownership** and mass distribution.
-* This action opens the fractionalization modal to lock the NFT and create new QIE20 "share" tokens.
-* This is ideal for democratizing access to high-value assets (like property).
+- For **shared ownership** and mass distribution.
+- This action opens the fractionalization modal to lock the NFT and create new QIE20 "share" tokens.
+- This is ideal for democratizing access to high-value assets (like property).
 
 ---
 
@@ -297,10 +298,10 @@ After successful minting, the user is given two powerful, distinct options for t
 
 If the user chooses "Option B," they are presented with a simple form to create their new fractional tokens:
 
-* **Total Supply**: The user decides how many "shares" to create (e.g., 10,000).
-* **Token Name**: Auto-generated from the NFT name (e.g., "Fractional Property Deed #5") but fully editable.
-* **Token Symbol**: Auto-generated (e.g., "F5") but fully editable.
-* **Preview**: A real-time preview of what their new fractional token will look like.
+- **Total Supply**: The user decides how many "shares" to create (e.g., 10,000).
+- **Token Name**: Auto-generated from the NFT name (e.g., "Fractional Property Deed #5") but fully editable.
+- **Token Symbol**: Auto-generated (e.g., "F5") but fully editable.
+- **Preview**: A real-time preview of what their new fractional token will look like.
 
 **User Experience:**
 This flow guides the user through creating a new ERC20 token without needing to understand contract code. The `Fractionalize` button initiates a 2-step process: 1. Approve NFT Transfer, 2. Call `fractionalizeNFT` function.
@@ -317,17 +318,17 @@ This flow guides the user through creating a new ERC20 token without needing to 
 
 Once the on-chain transaction is confirmed, the modal advances to a success screen showing:
 
-* **Confirmation**: "Successfully created 100 fractional tokens!"
-* **Token Details**: The new Token Address, Name, Symbol, and Supply.
-* The NFT is now securely locked in the `FractionalNFT.sol` contract.
-* The user's wallet has been minted the full supply of new QIE20 tokens.
+- **Confirmation**: "Successfully created 100 fractional tokens!"
+- **Token Details**: The new Token Address, Name, Symbol, and Supply.
+- The NFT is now securely locked in the `FractionalNFT.sol` contract.
+- The user's wallet has been minted the full supply of new QIE20 tokens.
 
 **🎯 Next Steps (Post-Fractionalization):**
 
 The modal provides direct, actionable "Next Steps" for the user:
 
-* **Add Token to Wallet**: A one-click button that uses the `wallet_watchAsset` method to add the new QIE20 token to their MetaMask, so they can see their balance.
-* **View on QIEDEX**: A direct link to the `QIEDEX` DEX, where they can immediately create a liquidity pool for their new tokens (e.g., `F-PROP1 / ARIA`).
+- **Add Token to Wallet**: A one-click button that uses the `wallet_watchAsset` method to add the new QIE20 token to their MetaMask, so they can see their balance.
+- **View on QIEDEX**: A direct link to the `QIEDEX` DEX, where they can immediately create a liquidity pool for their new tokens (e.g., `F-PROP1 / ARIA`).
 
 **Why This Matters:**
 This completes the entire DeFi loop. A.R.I.A. doesn't just mint an illiquid NFT; it provides the tools to create a liquid, tradeable ERC20 market for that asset on QIE's native DEX.
@@ -353,13 +354,12 @@ Each NFT card now displays:
 &nbsp;&nbsp;• If ARIA-priced → shows fixed ARIA amount  
 &nbsp;&nbsp;• If USD-pegged → shows USD price + live ARIA equivalent  
 🧍 **Seller Information** – truncated wallet address  
-⚙️ **Action Buttons** – “Buy Now”, “Your Listing”, or disabled if not enough balance  
+⚙️ **Action Buttons** – “Buy Now”, “Your Listing”, or disabled if not enough balance
 
 **Why This Matters:**  
 Buyers can now see **real-world asset value in USD** while still purchasing using **ARIA tokens**, bringing familiar pricing UX to Web3 without losing token utility.
 
 ---
-
 
 ### 7️⃣ **Step 9: Mint ARIA Tokens**
 
@@ -372,10 +372,10 @@ The **Mint ARIA** page allows users to convert ETH (or QIE) into **ARIA utility 
 
 **Key Features:**
 
-- Simple ETH-to-ARIA conversion  
-- Real-time balance display  
-- One-click minting  
-- Gas-optimized contract interaction  
+- Simple ETH-to-ARIA conversion
+- Real-time balance display
+- One-click minting
+- Gas-optimized contract interaction
 
 **Why It Matters:**  
 This establishes **ARIA** as the native utility token powering the ecosystem.
@@ -393,22 +393,22 @@ The **Staking & Rewards** module allows users to stake ARIA tokens and earn prop
 
 **Key Features:**
 
-- 💎 Stake / Unstake ARIA instantly  
-- 💰 Claim Rewards anytime  
+- 💎 Stake / Unstake ARIA instantly
+- 💰 Claim Rewards anytime
 - 📊 Live pool stats:
   - Total staked
   - Personal stake
-  - Claimable rewards  
+  - Claimable rewards
 - 🔒 Non-custodial staking (user retains wallet control)
 
 **Displayed Metrics:**
 
-| Metric | Description |
-|---------|--------------|
-| **Your ARIA Balance** | Total ARIA held in wallet |
-| **Staked ARIA** | Tokens currently staked |
+| Metric                | Description                       |
+| --------------------- | --------------------------------- |
+| **Your ARIA Balance** | Total ARIA held in wallet         |
+| **Staked ARIA**       | Tokens currently staked           |
 | **Claimable Rewards** | ARIA earned from marketplace fees |
-| **Total Pool Size** | Combined staked ARIA |
+| **Total Pool Size**   | Combined staked ARIA              |
 
 **Why It Matters:**  
 Staking transforms ARIA holders into active participants, decentralizing governance and reward distribution.
@@ -428,17 +428,17 @@ This page is currently built for **developer & testing purposes**, enabling dyna
 **Key Features:**
 
 - 📍 **Live ARIA/USD Feed Display**  
-  Shows the current oracle price, last updated time, and feed freshness status  
+  Shows the current oracle price, last updated time, and feed freshness status
 
 - 🔄 **Update Mock Oracle Prices in Real-Time**  
-  Developers can modify ARIA/USD, ETH/USD, INR/USD, and RE Index values to simulate real market movements  
+  Developers can modify ARIA/USD, ETH/USD, INR/USD, and RE Index values to simulate real market movements
 
 - 🧪 **Test USD-Pegged Listings**  
-  Instantly see how NFT prices react when oracle values change  
+  Instantly see how NFT prices react when oracle values change
 
 - 🚦 **Oracle Health Controls**  
   Enable/disable oracle usage to test fallback logic  
-  (Marketplace automatically switches to static pricing if oracle is unavailable)  
+  (Marketplace automatically switches to static pricing if oracle is unavailable)
 
 **Why It Matters:**  
 This dashboard ensures the **dynamic pricing engine is stable, reliable, and production-ready** before connecting to live QIE oracle feeds — reducing risk and improving safety of real-world value trading.
@@ -451,16 +451,16 @@ This dashboard ensures the **dynamic pricing engine is stable, reliable, and pro
 
 Sellers can now choose how they want to price their RWA NFTs:
 
-| Mode | Description | Best For | Status |
-|-------|----------------|-------------|------------|
-| **Static ARIA Price** | Seller lists NFT at a fixed ARIA value | Stable ARIA environments | ✅ Live |
+| Mode                          | Description                                                                              | Best For                                         | Status                |
+| ----------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------ | --------------------- |
+| **Static ARIA Price**         | Seller lists NFT at a fixed ARIA value                                                   | Stable ARIA environments                         | ✅ Live               |
 | **USD-Pegged (Oracle) Price** | Seller lists NFT in USD; buyer pays in ARIA dynamically calculated via oracle price feed | Volatile ARIA markets & real-world asset pricing | ✅ Live (Mock Oracle) |
 
 **Why This Matters**
 
-- Protects sellers from ARIA token volatility  
-- Makes RWA pricing intuitive (people think in USD, not ARIA)  
-- Enables institutional adoption (USD is the universal pricing language)  
+- Protects sellers from ARIA token volatility
+- Makes RWA pricing intuitive (people think in USD, not ARIA)
+- Enables institutional adoption (USD is the universal pricing language)
 
 > Example: Seller lists an NFT for **$100 USD** → System fetches ARIA/USD price → Buyer pays real-time ARIA equivalent.
 
@@ -470,15 +470,15 @@ Sellers can now choose how they want to price their RWA NFTs:
 
 A.R.I.A. now supports an **oracle-driven pricing architecture**.
 
-- Fetches **ARIA/USD** live feed from Oracle contract  
-- Marketplace uses feed to compute ARIA required for USD-pegged listings  
-- Can plug into **QIE Oracle Network** with **zero code changes** to UI or backend  
+- Fetches **ARIA/USD** live feed from Oracle contract
+- Marketplace uses feed to compute ARIA required for USD-pegged listings
+- Can plug into **QIE Oracle Network** with **zero code changes** to UI or backend
 
 Currently includes:
 
-- **IQIEOracle.sol** for local development & testing  
-- Pre-seeded with ARIA/USD, ETH/USD, INR/USD, RE Index values  
-- Auto-wires oracle to marketplace contract on deployment  
+- **IQIEOracle.sol** for local development & testing
+- Pre-seeded with ARIA/USD, ETH/USD, INR/USD, RE Index values
+- Auto-wires oracle to marketplace contract on deployment
 
 ---
 
@@ -496,7 +496,7 @@ A new developer-focused Oracle Dashboard has been added to help test pricing flo
 ### 4. Dual Liquidity Paths (List vs. Fractionalize)
 
 - **User Choice**: After minting, users can choose to sell their NFT whole (ERC721) on the marketplace OR fractionalize it into shares (ERC20).
-- **Smart Naming**: The custom name (`🏠 Property Deed #5`) is set once and used for both the marketplace listing *or* as the prefix for fractional tokens.
+- **Smart Naming**: The custom name (`🏠 Property Deed #5`) is set once and used for both the marketplace listing _or_ as the prefix for fractional tokens.
 - **Icon Integration**: Document type icons persist in names for easy identification.
 
 ### 5. IPFS Metadata Transparency
@@ -510,7 +510,19 @@ A new developer-focused Oracle Dashboard has been added to help test pricing flo
 
 - **One-Click DeFi**: Users can fractionalize any verified NFT into QIE20 tokens directly from the UI.
 - **QIEDEX Integration**: The success modal links directly to QIEDEX, guiding users to create liquidity pools for their new fractional tokens.
-- **Wallet Integration**: Includes an "Add to Wallet" button (`wallet_watchAsset`) for a seamless UX, allowing users to immediately see their new tokens in MetaMask.
+- **Wallet Integration**: Includes an "Add to Wallet" button (`wallet_watchAsset`) for a seamless UX.
+
+### 7. Governance & Dispute Resolution (NEW)
+
+- **Community Policing**: Users can flag suspicious assets on the Governance page.
+- **Fraud Prevention**: Flagged assets are marked as "SUSPICIOUS" to warn potential buyers.
+- **Decentralized Trust**: Ensures the ecosystem remains clean and trustworthy.
+
+### 8. AI Fraud Detection (NEW)
+
+- **Future-Date Detection**: AI automatically flags invoices or documents with future dates (e.g., 2030).
+- **Risk Scoring**: Assigns "HIGH RISK" status to anomalies.
+- **Automatic Rejection**: Prevents obvious fraud from entering the system.
 
 #### **1. Custom NFT Naming System**
 
@@ -567,26 +579,26 @@ A.R.I.A. doesn’t just mint NFTs — it creates a **closed, self-sustaining RWA
 
 #### **4. Oracle-Powered Hybrid Pricing (NEW)**
 
-- Sellers can list NFTs in **Static ARIA** or **USD-Pegged (Oracle)** mode  
-- USD listings use **live ARIA/USD feed** to convert at purchase time  
-- Protects sellers from ARIA volatility & makes pricing intuitive for buyers  
-- Buyers still settle in **ARIA**, keeping token utility intact  
+- Sellers can list NFTs in **Static ARIA** or **USD-Pegged (Oracle)** mode
+- USD listings use **live ARIA/USD feed** to convert at purchase time
+- Protects sellers from ARIA volatility & makes pricing intuitive for buyers
+- Buyers still settle in **ARIA**, keeping token utility intact
 
 > Web2-friendly pricing with Web3 settlement — best of both worlds.
 
 #### **5. Step-by-Step UX Designed for Non-Crypto Users**
 
-- **Clear progression**: Select Type → Upload → AI Verify → Mint NFT → Sell  
-- **Visual feedback** & guided prompts throughout  
-- **Fail-safe UI** — actions disabled until correct step is ready  
-- **Progress states** for AI analysis, IPFS upload, minting, and listing  
+- **Clear progression**: Select Type → Upload → AI Verify → Mint NFT → Sell
+- **Visual feedback** & guided prompts throughout
+- **Fail-safe UI** — actions disabled until correct step is ready
+- **Progress states** for AI analysis, IPFS upload, minting, and listing
 
 #### **6. Technical Excellence**
 
-- **QIE Blockchain** — 25,000 TPS, ~3s finality, near-zero fees  
-- **IPFS Persistence** — tamper-proof metadata & verification records  
-- **Modular Smart Contracts** — gas-optimized, secure, flexible architecture  
-- **Live Data Streams** — WebSocket-based TX tracking and oracle pricing  
+- **QIE Blockchain** — 25,000 TPS, ~3s finality, near-zero fees
+- **IPFS Persistence** — tamper-proof metadata & verification records
+- **Modular Smart Contracts** — gas-optimized, secure, flexible architecture
+- **Live Data Streams** — WebSocket-based TX tracking and oracle pricing
 
 ---
 
@@ -605,10 +617,10 @@ Every listed NFT displays a **human-friendly, branded name**, making assets stan
 
 **Why It Works**
 
-- ✅ **Easy Discovery** — searchable, recognizable names  
-- ✅ **Polished Marketplace Feel** — looks like a real RWA marketplace  
-- ✅ **Seller Branding** — sellers create identity & trust  
-- ✅ **Smart Defaults** — auto-generated names save time  
+- ✅ **Easy Discovery** — searchable, recognizable names
+- ✅ **Polished Marketplace Feel** — looks like a real RWA marketplace
+- ✅ **Seller Branding** — sellers create identity & trust
+- ✅ **Smart Defaults** — auto-generated names save time
 
 ### **IPFS Metadata Transparency**
 
@@ -616,28 +628,28 @@ Every NFT includes a **direct IPFS link** to its immutable verification data.
 
 **What Buyers Can Review Before Purchase:**
 
-- Full AI Verification Report  
-- All extracted document fields  
-- Authenticity markers & QR results  
-- Suspicious elements flagged (if any)  
-- Confidence & Trust Scores  
+- Full AI Verification Report
+- All extracted document fields
+- Authenticity markers & QR results
+- Suspicious elements flagged (if any)
+- Confidence & Trust Scores
 
 **Why It Matters**
 
-- 🔍 **Full Transparency** — nothing hidden  
-- 🔒 **Immutable Proof** — zero tampering possible  
-- 🤝 **Trust at First Sight** — builds buyer confidence instantly  
-- ✅ **Due Diligence** — review proof before purchase  
+- 🔍 **Full Transparency** — nothing hidden
+- 🔒 **Immutable Proof** — zero tampering possible
+- 🤝 **Trust at First Sight** — builds buyer confidence instantly
+- ✅ **Due Diligence** — review proof before purchase
 
 ### **Smart Listing UX (Now With Hybrid Pricing)**
 
 The listing experience remains ultra-simple — now with dual pricing support:
 
-1. **Smart Naming** auto-fills based on document type  
-2. **Choose Pricing Mode**: Static ARIA or USD-Pegged (Oracle)  
-3. **Enter Price** (USD or ARIA) — 2 fields only  
-4. **Visual Progress Indicators** during approval & listing  
-5. **Real-time Feedback** + IPFS metadata links on success  
+1. **Smart Naming** auto-fills based on document type
+2. **Choose Pricing Mode**: Static ARIA or USD-Pegged (Oracle)
+3. **Enter Price** (USD or ARIA) — 2 fields only
+4. **Visual Progress Indicators** during approval & listing
+5. **Real-time Feedback** + IPFS metadata links on success
 
 **Result**  
 A user can go from **document → verified NFT → listed for sale** in minutes — with **Web2-familiar pricing** and **Web3 settlement**.
@@ -708,61 +720,72 @@ A user can go from **document → verified NFT → listed for sale** in minutes 
 
 ```
 
-
 ### **Technology Stack**
 
 #### **Frontend**
 
-- **Framework**: React 18 with Vite  
-- **UI Library**: Chakra UI (custom dark theme)  
-- **Blockchain**: Ethers.js v6  
-- **File Handling**: React Dropzone  
-- **State Management**: React Hooks  
-- **Routing**: React Router v6  
-- **Developer Tools**:  
-  - ✅ **Oracle Dashboard UI** (for testing pricing flows)  
+- **Framework**: React 18 with Vite
+- **UI Library**: Chakra UI (custom dark theme)
+- **Blockchain**: Ethers.js v6
+- **File Handling**: React Dropzone
+- **State Management**: React Hooks
+- **Routing**: React Router v6
+- **Developer Tools**:
+  - ✅ **Oracle Dashboard UI** (for testing pricing flows)
 
 #### **Backend**
 
-- **Language**: Python 3.9+  
-- **Framework**: Flask + CORS  
-- **AI Engine**: Google Gemini 2.5 Pro API  
-- **Image Processing**: OpenCV + PIL for QR scanning  
-- **PDF Handling**: pypdf  
-- **Blockchain**: Web3.py  
-- **Storage**: IPFS (Pinata API)  
+- **Language**: Python 3.9+
+- **Framework**: Flask + CORS
+- **AI Engine**: Google Gemini 2.5 Pro API
+- **Image Processing**: OpenCV + PIL for QR scanning
+- **PDF Handling**: pypdf
+- **Blockchain**: Web3.py
+- **Storage**: IPFS (Pinata API)
 
 #### **Smart Contracts**
 
-- **Language**: Solidity 0.8.20  
-- **Standards**: ERC-721 (NFTs), ERC-20 (ARIA Token), QIE20 (Fraction Tokens)  
-- **Security**: OpenZeppelin, ReentrancyGuard  
-- **Core Contracts**:  
-  - `AriaNFT.sol` — Core RWA NFT (ERC721)  
-  - `AriaToken.sol` — ARIA Utility Token (ERC20)  
-  - `AriaMarketplace.sol` — Whole NFT sales with **Static ARIA + USD-Pegged Pricing**  
-  - `FractionalNFT.sol` — NFT escrow & fractional ERC20 factory  
-  - `IQIEOracle.sol` — Dev/test oracle for ARIA/USD price feed *(mainnet-ready)*  
+- **Language**: Solidity 0.8.20
+- **Standards**: ERC-721 (NFTs), ERC-20 (ARIA Token), QIE20 (Fraction Tokens)
+- **Security**: OpenZeppelin, ReentrancyGuard
+- **Core Contracts**:
 
-- **Pricing Logic Built-In**  
-  - USD-pegged price stored in **1e8 precision**  
-  - Converts at runtime using oracle feed  
+  - `AriaNFT.sol` — Core RWA NFT (ERC721)
+  - `AriaToken.sol` — ARIA Utility Token (ERC20)
+  - `AriaMarketplace.sol` — Whole NFT sales with **Static ARIA + USD-Pegged Pricing**
+  - `FractionalNFT.sol` — NFT escrow & fractional ERC20 factory
+  - `IQIEOracle.sol` — Dev/test oracle for ARIA/USD price feed _(mainnet-ready)_
 
-- **Development**: Hardhat  
-- **Deployment Targets**:  
-  - QIE Local Dev Network  
-  - QIE Testnet (WIP)  
-  - QIE Mainnet (Planned)  
+- **Pricing Logic Built-In**
+
+  - USD-pegged price stored in **1e8 precision**
+  - Converts at runtime using oracle feed
+
+- **Development**: Hardhat
+- **Deployment Targets**:
+  - QIE Local Dev Network
+  - QIE Testnet (Deployed)
+  - QIE Mainnet (Planned)
+
+#### **Deployed Contracts (QIE Testnet)**
+
+| Contract          | Address                                      |
+| ----------------- | -------------------------------------------- |
+| **AriaToken**     | `0xaE2a6140DC27a73501eb3e26e656fA5Cfd8dec3e` |
+| **AriaNFT**       | `0xA1396CAe4A1Bf6C7Bd2e322F916967905E8d85e4` |
+| **Marketplace**   | `0xD504D75D5ebfaBEfF8d35658e85bbc52CC66d880` |
+| **FractionalNFT** | `0x3e2B64f8d927447C370CD6a84FAdf92f6B95C806` |
+| **MockOracle**    | `0xf37F527E7b50A07Fa7fd49D595132a1f2fDC5f98` |
 
 #### **Infrastructure**
 
-- **Blockchain**: QIE Network (25K+ TPS, ~3s finality, 80% gas burn)  
-- **IPFS**: Pinata Gateway  
-- **Wallets**: MetaMask + QIE Wallet  
-- **Hosting**:  
-  - Frontend — Vercel  
-  - Backend — Render  
-  - Oracle UI — Local Dev Tool (optional)  
+- **Blockchain**: QIE Network (25K+ TPS, ~3s finality, 80% gas burn)
+- **IPFS**: Pinata Gateway
+- **Wallets**: MetaMask + QIE Wallet
+- **Hosting**:
+  - Frontend — Vercel
+  - Backend — Render
+  - Oracle UI — Local Dev Tool (optional)
 
 ---
 
@@ -852,25 +875,25 @@ Frontend will start on `http://localhost:5173`
 
 ## 📊 Supported Document Types
 
-| Icon | Type | Extracted Fields | Use Cases | Status |
-|------|------|------------------|-----------|--------|
-| 💰 | **Invoice** | Invoice #, amount, date, vendor, buyer, items, tax | B2B transactions, accounting | ✅ Tested |
-| 🏠 | **Property Deed** | Address, owner, value, date, legal description | Real estate tokenization | ✅ Ready |
-| 🚗 | **Vehicle Reg** | VIN, make, model, year, owner, plate | Car ownership verification | ✅ Ready |
-| 🎓 | **Certificate** | Name, institution, degree, date, credential ID | Educational credentials | ✅ Ready |
-| 📦 | **Supply Chain** | Shipment ID, origin, destination, goods, value | Logistics tracking | ✅ Ready |
-| ⚕️ | **Medical Record** | Patient, doctor, diagnosis, treatment, date | Healthcare records | ✅ Ready |
-| 📜 | **Legal Contract** | Parties, dates, terms, contract value | Legal agreements | ✅ Ready |
-| 🛡️ | **Insurance** | Policy #, coverage, premium, dates | Insurance policies | ✅ Ready |
+| Icon | Type               | Extracted Fields                                   | Use Cases                    | Status    |
+| ---- | ------------------ | -------------------------------------------------- | ---------------------------- | --------- |
+| 💰   | **Invoice**        | Invoice #, amount, date, vendor, buyer, items, tax | B2B transactions, accounting | ✅ Tested |
+| 🏠   | **Property Deed**  | Address, owner, value, date, legal description     | Real estate tokenization     | ✅ Ready  |
+| 🚗   | **Vehicle Reg**    | VIN, make, model, year, owner, plate               | Car ownership verification   | ✅ Ready  |
+| 🎓   | **Certificate**    | Name, institution, degree, date, credential ID     | Educational credentials      | ✅ Ready  |
+| 📦   | **Supply Chain**   | Shipment ID, origin, destination, goods, value     | Logistics tracking           | ✅ Ready  |
+| ⚕️   | **Medical Record** | Patient, doctor, diagnosis, treatment, date        | Healthcare records           | ✅ Ready  |
+| 📜   | **Legal Contract** | Parties, dates, terms, contract value              | Legal agreements             | ✅ Ready  |
+| 🛡️   | **Insurance**      | Policy #, coverage, premium, dates                 | Insurance policies           | ✅ Ready  |
 
 ### **Testing Results**
 
 | Document Type | Files Tested | Avg. Authenticity | Avg. Confidence | QR Success Rate |
-|---------------|--------------|-------------------|-----------------|-----------------|
-| Invoice | 5 | 94% | 96% | 80% |
-| Property Deed | 3 | 88% | 91% | 60% |
-| Vehicle Reg | 2 | 92% | 93% | 70% |
-| Certificate | 4 | 90% | 95% | 50% |
+| ------------- | ------------ | ----------------- | --------------- | --------------- |
+| Invoice       | 5            | 94%               | 96%             | 80%             |
+| Property Deed | 3            | 88%               | 91%             | 60%             |
+| Vehicle Reg   | 2            | 92%               | 93%             | 70%             |
+| Certificate   | 4            | 90%               | 95%             | 50%             |
 
 ---
 
@@ -910,24 +933,24 @@ Frontend will start on `http://localhost:5173`
 
 ## 📈 Competitive Analysis
 
-| Feature | **A.R.I.A.** | Competitor A | Competitor B |
-|---------|--------------|--------------|--------------|
-| Document Types Supported | **8+** | 1–2 | 2–3 |
-| Verification Speed | **<3 seconds** | 3–7 days | Hours |
-| AI Model | **Gemini 2.5 Pro (RWA-tuned)** | GPT-3.5 | Custom |
-| QR Verification Layer | **✅ Yes (Dual verification)** | ❌ No | ❌ No |
-| Pricing Model | **Static ARIA + USD-Pegged (Oracle)** | Static Crypto only | Static Crypto |
-| Live Price Oracle | **✅ Yes (Plug-and-Play for QIE Oracles)** | ❌ No | ❌ No |
-| Blockchain | **QIE (25K TPS)** | Ethereum | Polygon |
-| Gas Fees | **~$0.01** | $5–$50 | $0.10–$1 |
-| Marketplace | **✅ Built-in** | ❌ No | ✅ Yes |
-| Staking Rewards | **✅ Yes (Fee redistribution)** | ❌ No | ❌ No |
-| Custom NFT Names | **✅ Yes** | ❌ No | ❌ No |
-| IPFS Metadata Links | **✅ Full reports** | Partial | ❌ No |
-| Smart Auto-Naming | **✅ Yes** | Manual | Manual |
-| Fractionalization | **✅ Native (ERC721→ERC20)** | ❌ No | ❌ No |
-| DeFi Liquidity Path | **✅ QIEDEX integrated** | ❌ No | Partial |
-| Open Source | **✅ Yes** | ❌ No | Partial |
+| Feature                  | **A.R.I.A.**                               | Competitor A       | Competitor B  |
+| ------------------------ | ------------------------------------------ | ------------------ | ------------- |
+| Document Types Supported | **8+**                                     | 1–2                | 2–3           |
+| Verification Speed       | **<3 seconds**                             | 3–7 days           | Hours         |
+| AI Model                 | **Gemini 2.5 Pro (RWA-tuned)**             | GPT-3.5            | Custom        |
+| QR Verification Layer    | **✅ Yes (Dual verification)**             | ❌ No              | ❌ No         |
+| Pricing Model            | **Static ARIA + USD-Pegged (Oracle)**      | Static Crypto only | Static Crypto |
+| Live Price Oracle        | **✅ Yes (Plug-and-Play for QIE Oracles)** | ❌ No              | ❌ No         |
+| Blockchain               | **QIE (25K TPS)**                          | Ethereum           | Polygon       |
+| Gas Fees                 | **~$0.01**                                 | $5–$50             | $0.10–$1      |
+| Marketplace              | **✅ Built-in**                            | ❌ No              | ✅ Yes        |
+| Staking Rewards          | **✅ Yes (Fee redistribution)**            | ❌ No              | ❌ No         |
+| Custom NFT Names         | **✅ Yes**                                 | ❌ No              | ❌ No         |
+| IPFS Metadata Links      | **✅ Full reports**                        | Partial            | ❌ No         |
+| Smart Auto-Naming        | **✅ Yes**                                 | Manual             | Manual        |
+| Fractionalization        | **✅ Native (ERC721→ERC20)**               | ❌ No              | ❌ No         |
+| DeFi Liquidity Path      | **✅ QIEDEX integrated**                   | ❌ No              | Partial       |
+| Open Source              | **✅ Yes**                                 | ❌ No              | Partial       |
 
 ---
 
@@ -987,44 +1010,44 @@ Frontend will start on `http://localhost:5173`
 
 #### **Document Type: Invoice**
 
-- [X] Upload invoice PDF
-- [X] Select "Invoice" type
-- [X] Verify extraction: invoice_number, total, date, vendor
-- [X] Check authenticity markers found
-- [X] Confirm QR code scanned (if present)
-- [X] Verify 80%+ authenticity score
-- [X] Confirm NFT minted with correct token ID
-- [X] List on marketplace
-- [X] Purchase with another account
+- [x] Upload invoice PDF
+- [x] Select "Invoice" type
+- [x] Verify extraction: invoice_number, total, date, vendor
+- [x] Check authenticity markers found
+- [x] Confirm QR code scanned (if present)
+- [x] Verify 80%+ authenticity score
+- [x] Confirm NFT minted with correct token ID
+- [x] List on marketplace
+- [x] Purchase with another account
 
 #### **Document Type: Property Deed**
 
-- [X] Upload property deed
-- [X] Select "Property Deed" type
-- [X] Verify extraction: address, owner, value, date
-- [X] Check for government seals/stamps
-- [X] Confirm data accuracy
-- [X] Mint and list
+- [x] Upload property deed
+- [x] Select "Property Deed" type
+- [x] Verify extraction: address, owner, value, date
+- [x] Check for government seals/stamps
+- [x] Confirm data accuracy
+- [x] Mint and list
 
 #### **Marketplace Features Testing**
 
-- [X] NFT listed with custom name shows correctly
-- [X] IPFS metadata link is clickable and works
-- [X] IPFS link opens full metadata in new tab
-- [X] Auto-generated name follows format: `icon + type + ID`
-- [X] User can edit auto-generated name
-- [X] Empty name field disables list button
-- [X] Marketplace refreshes and shows new name
-- [X] Purchase doesn't break with custom names
-- [X] IPFS links work for old and new listings
+- [x] NFT listed with custom name shows correctly
+- [x] IPFS metadata link is clickable and works
+- [x] IPFS link opens full metadata in new tab
+- [x] Auto-generated name follows format: `icon + type + ID`
+- [x] User can edit auto-generated name
+- [x] Empty name field disables list button
+- [x] Marketplace refreshes and shows new name
+- [x] Purchase doesn't break with custom names
+- [x] IPFS links work for old and new listings
 
 #### **Error Handling**
 
-- [X] Try uploading without selecting type → Warning shown
-- [X] Try selecting type without file → Upload disabled
-- [X] Upload corrupted file → Error handled gracefully
-- [X] Disconnect wallet mid-process → Proper error message
-- [X] Upload unsupported file type → Rejected with message
+- [x] Try uploading without selecting type → Warning shown
+- [x] Try selecting type without file → Upload disabled
+- [x] Upload corrupted file → Error handled gracefully
+- [x] Disconnect wallet mid-process → Proper error message
+- [x] Upload unsupported file type → Rejected with message
 
 ### **Automated Tests**
 
@@ -1066,7 +1089,6 @@ npm run test:e2e
 - IPFS Storage: **Free** (Pinata free tier)
 - AI Analysis: **$0.001** per document
 - **Total Cost**: **~$0.01** per RWA NFT
-
 
 ---
 

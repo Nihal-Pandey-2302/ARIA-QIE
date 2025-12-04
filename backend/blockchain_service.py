@@ -8,7 +8,7 @@ load_dotenv()
 
 class BlockchainService:
     # --- CONFIGURATION ---
-    PROVIDER_URL = "http://127.0.0.1:8545/"
+    PROVIDER_URL = os.getenv("QIE_RPC_URL", "https://rpc1testnet.qie.digital")
     
     # Load the server's wallet private key from .env
     # This is the first account provided by the `npx hardhat node` command

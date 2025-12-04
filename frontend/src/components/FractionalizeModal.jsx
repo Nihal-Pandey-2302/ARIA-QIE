@@ -1,24 +1,52 @@
 // src/components/FractionalizeModal.jsx
-import { useState }from 'react';
+import { useState } from "react";
 import {
-  Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter,
-  ModalBody, ModalCloseButton, Button, VStack, HStack, Input,
-  FormControl, FormLabel, Text, Alert, AlertIcon, Progress,
-  Badge, Box, useToast, InputGroup, InputRightAddon
-} from '@chakra-ui/react';
-import { ethers } from 'ethers';
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  VStack,
+  HStack,
+  Input,
+  FormControl,
+  FormLabel,
+  Text,
+  Alert,
+  AlertIcon,
+  Progress,
+  Badge,
+  Box,
+  useToast,
+  InputGroup,
+  InputRightAddon,
+  IconButton,
+  Tooltip,
+} from "@chakra-ui/react";
+import { ethers } from "ethers";
 import {
-  FRACTIONAL_NFT_ADDRESS, FRACTIONAL_NFT_ABI,
-  ARIA_NFT_ADDRESS, BACKEND_URL
-} from '../constants';
+  FRACTIONAL_NFT_ADDRESS,
+  FRACTIONAL_NFT_ABI,
+  ARIA_NFT_ADDRESS,
+  BACKEND_URL,
+} from "../constants";
 
-// 1. ADD NEW ICON
-import { AddIcon } from '@chakra-ui/icons';
+// 1. ADD NEW ICONS
+import { AddIcon, CopyIcon, ExternalLinkIcon } from "@chakra-ui/icons";
 
-const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => {
-  const [tokenSupply, setTokenSupply] = useState('');
-  const [fractionName, setFractionName] = useState('');
-  const [fractionSymbol, setFractionSymbol] = useState('');
+const FractionalizeModal = ({
+  isOpen,
+  onClose,
+  tokenId,
+  tokenName,
+  signer,
+}) => {
+  const [tokenSupply, setTokenSupply] = useState("");
+  const [fractionName, setFractionName] = useState("");
+  const [fractionSymbol, setFractionSymbol] = useState("");
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Form, 2: Approving, 3: Creating, 4: Success
   const [result, setResult] = useState(null);
@@ -28,14 +56,14 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
 
   const generateDefaults = () => {
     if (!tokenId) return;
-    
+
     const baseName = tokenName || `RWA NFT #${tokenId}`;
     const defaultName = `Fractional ${baseName}`;
     const defaultSymbol = `F${tokenId}`;
-    
+
     setFractionName(defaultName);
     setFractionSymbol(defaultSymbol);
-    setTokenSupply('10000'); // Default 10,000 tokens
+    setTokenSupply("10000"); // Default 10,000 tokens
   };
 
   const handleOpen = () => {
@@ -50,7 +78,7 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
         title: "Invalid token supply",
         description: "Supply must be a positive number",
         status: "error",
-        duration: 3000
+        duration: 3000,
       });
       return false;
     }
@@ -60,7 +88,7 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
         title: "Missing information",
         description: "Please fill in all fields",
         status: "error",
-        duration: 3000
+        duration: 3000,
       });
       return false;
     }
@@ -70,7 +98,7 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
         title: "Symbol too long",
         description: "Symbol must be 10 characters or less",
         status: "error",
-        duration: 3000
+        duration: 3000,
       });
       return false;
     }
@@ -78,14 +106,13 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
     return true;
   };
 
-
   const handleFractionalize = async () => {
     if (!validateInputs()) return;
     if (!signer) {
       toast({
         title: "Wallet not connected",
         status: "error",
-        duration: 3000
+        duration: 3000,
       });
       return;
     }
@@ -94,34 +121,37 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
 
     try {
       const userAddress = await signer.getAddress();
-      
+
       // Step 1: Approve FractionalNFT contract to transfer NFT
       setStep(2);
       toast({
         title: "Step 1/2: Approving NFT transfer",
         status: "info",
         duration: null,
-        isClosable: false
+        isClosable: false,
       });
 
       const nftContract = new ethers.Contract(
         ARIA_NFT_ADDRESS,
-        ['function approve(address to, uint256 tokenId)'],
+        ["function approve(address to, uint256 tokenId)"],
         signer
       );
 
-      const approveTx = await nftContract.approve(FRACTIONAL_NFT_ADDRESS, tokenId);
+      const approveTx = await nftContract.approve(
+        FRACTIONAL_NFT_ADDRESS,
+        tokenId
+      );
       await approveTx.wait();
 
       toast.closeAll();
-      
+
       // Step 2: Fractionalize NFT
       setStep(3);
       toast({
         title: "Step 2/2: Creating fractional tokens",
         status: "info",
         duration: null,
-        isClosable: false
+        isClosable: false,
       });
 
       const fractionalContract = new ethers.Contract(
@@ -150,13 +180,13 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
       for (const log of receipt.logs) {
         try {
           const parsed = fractionalContract.interface.parseLog(log);
-          if (parsed.name === 'AssetFractionalized') {
+          if (parsed.name === "AssetFractionalized") {
             fractionalId = parsed.args.fractionalId.toString();
             tokenAddress = parsed.args.fractionToken;
             break;
           }
         } catch (e) {
-          console.debug('Skipping log:', e.message);
+          console.debug("Skipping log:", e.message);
         }
       }
 
@@ -170,7 +200,7 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
         txHash: receipt.hash,
         tokenName: fractionName,
         tokenSymbol: fractionSymbol,
-        totalSupply: tokenSupply // Store the base supply for display
+        totalSupply: tokenSupply, // Store the base supply for display
       });
 
       toast({
@@ -178,16 +208,15 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
         description: `Created ${tokenSupply} ${fractionSymbol} tokens`,
         status: "success",
         duration: 5000,
-        isClosable: true
+        isClosable: true,
       });
-
     } catch (error) {
-      console.error('Fractionalization error:', error);
+      console.error("Fractionalization error:", error);
       toast.closeAll();
 
-      let errorMsg = 'Transaction failed';
-      if (error.message?.includes('user rejected')) {
-        errorMsg = 'Transaction was rejected';
+      let errorMsg = "Transaction failed";
+      if (error.message?.includes("user rejected")) {
+        errorMsg = "Transaction was rejected";
       } else if (error.reason) {
         errorMsg = error.reason;
       } else if (error.message) {
@@ -199,7 +228,7 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
         description: errorMsg,
         status: "error",
         duration: 7000,
-        isClosable: true
+        isClosable: true,
       });
 
       setStep(1);
@@ -221,14 +250,14 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
     if (!signer || !result?.tokenAddress) return;
 
     // The FractionToken.sol uses standard ERC20 decimals, which is 18
-    const tokenDecimals = 18; 
-    
+    const tokenDecimals = 18;
+
     try {
       // 'wallet_watchAsset' is the method for MetaMask and other compatible wallets
       const success = await signer.provider.request({
-        method: 'wallet_watchAsset',
+        method: "wallet_watchAsset",
         params: {
-          type: 'ERC20',
+          type: "ERC20",
           options: {
             address: result.tokenAddress,
             symbol: result.tokenSymbol,
@@ -240,25 +269,37 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
 
       if (success) {
         toast({
-          title: 'Token Added!',
+          title: "Token Added!",
           description: `${result.tokenSymbol} has been added to your wallet.`,
-          status: 'success',
+          status: "success",
           duration: 3000,
         });
       } else {
-        throw new Error('Wallet rejected the request');
+        throw new Error("Wallet rejected the request");
       }
     } catch (error) {
-      console.error('Failed to add token to wallet:', error);
+      console.error("Failed to add token to wallet:", error);
       toast({
-        title: 'Failed to add token',
-        description: error.message || 'Could not add token to wallet.',
-        status: 'error',
+        title: "Failed to add token",
+        description: error.message || "Could not add token to wallet.",
+        status: "error",
         duration: 5000,
       });
     }
   };
 
+  // 3. COPY ADDRESS HANDLER
+  const handleCopyAddress = () => {
+    if (result?.tokenAddress) {
+      navigator.clipboard.writeText(result.tokenAddress);
+      toast({
+        title: "Address Copied!",
+        status: "success",
+        duration: 2000,
+        size: "sm",
+      });
+    }
+  };
 
   return (
     <Modal
@@ -267,7 +308,7 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
       size="xl"
       // 3. FIX: Move onOpen prop to Modal, not onOpen to the element
       // This ensures generateDefaults() runs when the modal opens
-      onModalOpen={handleOpen} 
+      onModalOpen={handleOpen}
     >
       <ModalOverlay backdropFilter="blur(10px)" />
       <ModalContent bg="gray.800" borderWidth="2px" borderColor="purple.500">
@@ -293,8 +334,8 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
                   Turn your NFT into tradeable tokens
                 </Text>
                 <Text fontSize="xs" color="gray.300">
-                  Your NFT will be locked in escrow and fractional tokens will be created.
-                  You can redeem the NFT by burning all tokens.
+                  Your NFT will be locked in escrow and fractional tokens will
+                  be created. You can redeem the NFT by burning all tokens.
                 </Text>
               </VStack>
             </Alert>
@@ -338,7 +379,9 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
                   <Input
                     placeholder="F1"
                     value={fractionSymbol}
-                    onChange={(e) => setFractionSymbol(e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      setFractionSymbol(e.target.value.toUpperCase())
+                    }
                     maxLength={10}
                   />
                   <Text fontSize="xs" color="gray.400" mt={1}>
@@ -348,7 +391,13 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
 
                 {/* Preview */}
                 {tokenSupply && fractionSymbol && (
-                  <Box p={4} bg="purple.900" borderRadius="md" borderWidth="1px" borderColor="purple.600">
+                  <Box
+                    p={4}
+                    bg="purple.900"
+                    borderRadius="md"
+                    borderWidth="1px"
+                    borderColor="purple.600"
+                  >
                     <Text fontSize="xs" color="gray.400" mb={2}>
                       Preview:
                     </Text>
@@ -360,7 +409,11 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
                         <Badge colorScheme="purple">{fractionSymbol}</Badge>
                       </VStack>
                       <VStack align="end" spacing={1}>
-                        <Text fontSize="lg" fontWeight="bold" color="purple.300">
+                        <Text
+                          fontSize="lg"
+                          fontWeight="bold"
+                          color="purple.300"
+                        >
                           {parseInt(tokenSupply || 0).toLocaleString()}
                         </Text>
                         <Text fontSize="xs" color="gray.400">
@@ -402,29 +455,56 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
                 <Alert status="success" borderRadius="md">
                   <AlertIcon />
                   <Text fontSize="sm">
-                    Successfully created {parseInt(result.totalSupply).toLocaleString()} fractional tokens!
+                    Successfully created{" "}
+                    {parseInt(result.totalSupply).toLocaleString()} fractional
+                    tokens!
                   </Text>
                 </Alert>
 
                 <Box p={4} bg="gray.700" borderRadius="md">
                   <VStack align="stretch" spacing={3}>
                     <HStack justify="space-between">
-                      <Text fontSize="xs" color="gray.400">Token Name:</Text>
-                      <Text fontSize="sm" fontWeight="bold">{result.tokenName}</Text>
+                      <Text fontSize="xs" color="gray.400">
+                        Token Name:
+                      </Text>
+                      <Text fontSize="sm" fontWeight="bold">
+                        {result.tokenName}
+                      </Text>
                     </HStack>
                     <HStack justify="space-between">
-                      <Text fontSize="xs" color="gray.400">Symbol:</Text>
+                      <Text fontSize="xs" color="gray.400">
+                        Symbol:
+                      </Text>
                       <Badge colorScheme="purple">{result.tokenSymbol}</Badge>
                     </HStack>
                     <HStack justify="space-between">
-                      <Text fontSize="xs" color="gray.400">Total Supply:</Text>
-                      <Text fontSize="sm">{parseInt(result.totalSupply).toLocaleString()}</Text>
+                      <Text fontSize="xs" color="gray.400">
+                        Total Supply:
+                      </Text>
+                      <Text fontSize="sm">
+                        {parseInt(result.totalSupply).toLocaleString()}
+                      </Text>
                     </HStack>
                     <HStack justify="space-between">
-                      <Text fontSize="xs" color="gray.400">Token Address:</Text>
-                      <Text fontSize="xs" fontFamily="mono" color="cyan.300">
-                        {result.tokenAddress?.slice(0, 6)}...{result.tokenAddress?.slice(-4)}
+                      <Text fontSize="xs" color="gray.400">
+                        Token Address:
                       </Text>
+                      <HStack>
+                        <Text fontSize="xs" fontFamily="mono" color="cyan.300">
+                          {result.tokenAddress?.slice(0, 6)}...
+                          {result.tokenAddress?.slice(-4)}
+                        </Text>
+                        <Tooltip label="Copy Address">
+                          <IconButton
+                            icon={<CopyIcon />}
+                            size="xs"
+                            variant="ghost"
+                            colorScheme="cyan"
+                            onClick={handleCopyAddress}
+                            aria-label="Copy address"
+                          />
+                        </Tooltip>
+                      </HStack>
                     </HStack>
                   </VStack>
                 </Box>
@@ -436,37 +516,44 @@ const FractionalizeModal = ({ isOpen, onClose, tokenId, tokenName, signer }) => 
                       🎯 Next Steps:
                     </Text>
                     <Text fontSize="xs" color="gray.300">
-                      1. Add token to your wallet (click button below)<br />
-                      2. Create liquidity pool on QIEDEX<br />
-                      3. Start trading fractional ownership!
+                      1. Add token to your wallet (click button below)
+                      <br />
+                      2. Create liquidity pool on QIEDEX to enable trading
                     </Text>
                   </VStack>
                 </Alert>
 
                 {/* 4. WRAP BUTTONS IN HSTACK FOR SIDE-BY-SIDE LAYOUT */}
-                <HStack spacing={4}>
-                  <Button
-                    colorScheme="blue"
-                    variant="outline"
-                    onClick={handleAddToWallet}
-                    size="sm"
-                    leftIcon={<AddIcon />}
-                    flex={1} // Makes buttons equal width
-                  >
-                    Add {result.tokenSymbol} to Wallet
-                  </Button>
+                <VStack spacing={3}>
+                  <HStack spacing={4} width="100%">
+                    <Button
+                      colorScheme="blue"
+                      variant="outline"
+                      onClick={handleAddToWallet}
+                      size="sm"
+                      leftIcon={<AddIcon />}
+                      flex={1}
+                    >
+                      Add to Wallet
+                    </Button>
 
-                  <Button
-                    colorScheme="purple"
-                    as="a"
-                    href={`https://dex.qie.digital/token/${result.tokenAddress}`}
-                    target="_blank"
-                    size="sm"
-                    flex={1} // Makes buttons equal width
-                  >
-                    View on QIEDEX →
-                  </Button>
-                </HStack>
+                    <Button
+                      colorScheme="purple"
+                      as="a"
+                      href={`https://dex.qie.digital/pool/create?token=${result.tokenAddress}`}
+                      target="_blank"
+                      size="sm"
+                      rightIcon={<ExternalLinkIcon />}
+                      flex={1}
+                    >
+                      Create Pool on QIEDEX
+                    </Button>
+                  </HStack>
+
+                  <Text fontSize="xs" color="gray.500" textAlign="center">
+                    (Opens QIEDEX in a new tab)
+                  </Text>
+                </VStack>
               </VStack>
             )}
           </VStack>

@@ -38,15 +38,9 @@ const Navbar = () => {
         </HStack>
       </Link>
       
-      <Tooltip label="Coming Soon!" placement="bottom" hasArrow>
-        <Text
-          color={futureLinkColor}
-          cursor="not-allowed"
-          _hover={{ textDecoration: 'none' }}
-        >
-          Governance
-        </Text>
-      </Tooltip>
+      <Link as={NavLink} to="/governance" style={({ isActive }) => isActive ? activeStyle : undefined} color={inactiveLinkColor}>
+        Governance
+      </Link>
     </HStack>
   );
 };

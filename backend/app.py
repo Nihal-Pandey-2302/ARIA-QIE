@@ -22,12 +22,26 @@ from blockchain_service import BlockchainService
 from qiedex_service import QIEDEXService
 import time
 
-load_dotenv()
+# --- CONFIGURATION LOADING ---
+# Force load .env from the same directory as app.py
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+if os.path.exists(dotenv_path):
+    print(f"Loading .env from: {dotenv_path}")
+    load_dotenv(dotenv_path)
+else:
+    print("WARNING: .env file not found!")
+
 app = Flask(__name__)
 CORS(app)
 
 # --- API KEY CONFIGURATION ---
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    print("CRITICAL ERROR: GEMINI_API_KEY not found in environment!")
+    # Fallback for library default
+    GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
+
+PINATA_API_KEY = os.getenv("PINATA_API_KEY")
 PINATA_API_KEY = os.getenv("PINATA_API_KEY")
 PINATA_SECRET_API_KEY = os.getenv("PINATA_SECRET_API_KEY")
 

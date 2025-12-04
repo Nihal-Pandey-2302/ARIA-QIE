@@ -49,6 +49,9 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
     }
 
     mapping(uint256 => Listing) public listings;
+    
+    // --- Governance / Dispute Resolution ---
+    mapping(uint256 => bool) public isDisputed;
 
     // --- Staking: untouched (kept for back-compat with your UI) ---
     mapping(address => uint256) public stakedBalances;
@@ -74,6 +77,7 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
     event OracleUpdated(address oracle);
     event OracleStatusChanged(bool enabled);
     event PricePairUpdated(string pair);
+    event AssetDisputed(uint256 indexed tokenId, address indexed by);
 
     constructor(
         address _nftAddress,
@@ -150,6 +154,19 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
         delete listings[tokenId];
         emit AssetUnlisted(tokenId);
     }
+    
+    // ========= Governance / Dispute =========
+    
+    /// @notice Flag an asset as disputed/suspicious
+    /// @dev In a real DAO, this would require voting or staking. For hackathon, anyone can flag.
+    function disputeAsset(uint256 tokenId) external {
+        Listing memory L = listings[tokenId];
+        require(L.seller != address(0), "Not listed");
+        require(!isDisputed[tokenId], "Already disputed");
+        
+        isDisputed[tokenId] = true;
+        emit AssetDisputed(tokenId, msg.sender);
+    }
 
     // ========= Purchase =========
 
@@ -158,6 +175,9 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
         Listing memory L = listings[tokenId];
         require(L.seller != address(0), "Not listed");
         require(L.seller != msg.sender, "Cannot buy own");
+        
+        // Optional: Block purchase if disputed?
+        // require(!isDisputed[tokenId], "Asset is under dispute");
 
         uint256 toPayAria = _currentPriceInAria(L);
 
@@ -169,6 +189,10 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
 
         // Clear listing
         delete listings[tokenId];
+        // Clear dispute if any
+        if (isDisputed[tokenId]) {
+            delete isDisputed[tokenId];
+        }
 
         emit AssetPurchased(tokenId, msg.sender, L.seller, toPayAria, L.mode);
     }
@@ -217,7 +241,8 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
             string memory name,
             bool useDynamic,         // true if USD-pegged
             string memory pair,      // price pair (e.g., "ARIA/USD")
-            uint256 priceInUSD_E8    // USD value (1e8)
+            uint256 priceInUSD_E8,   // USD value (1e8)
+            bool disputed            // Dispute status
         )
     {
         Listing memory L = listings[tokenId];
@@ -236,10 +261,10 @@ contract AriaMarketplace is Ownable, ReentrancyGuard {
                     usdE8 = (L.ariaPrice * uint256(priceE8)) / decimalsFactor;
                 }
             }
-            return (L.seller, L.ariaPrice, curr, L.name, false, pricePair, usdE8);
+            return (L.seller, L.ariaPrice, curr, L.name, false, pricePair, usdE8, isDisputed[tokenId]);
         } else {
             // USD-pegged listing: usdPriceE8 is authoritative
-            return (L.seller, 0, curr, L.name, true, pricePair, L.usdPriceE8);
+            return (L.seller, 0, curr, L.name, true, pricePair, L.usdPriceE8, isDisputed[tokenId]);
         }
     }
 

@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AriaToken is ERC20, Ownable {
-    uint256 public rate = 1000; // 1 ETH = 1000 ARIA
+    uint256 public rate = 100000; // 1 ETH = 100,000 ARIA
     constructor() ERC20("Aria", "ARIA") {
         _mint(msg.sender, 100_000_000 * 10 ** decimals());
     }

@@ -9,6 +9,7 @@ import StakingPage from './pages/StakingPage';
 import MarketplacePage from './pages/MarketplacePage';
 import MintAriaPage from './pages/MintAriaPage'; // ← Added
 import OracleDashboard from './pages/OracleDashboard';
+import GovernancePage from './pages/GovernancePage';
 // Component Imports
 import Header from './components/Header';
 import Navbar from './components/Navbar';
@@ -185,6 +186,20 @@ function App() {
             }
           />
           <Route path="/oracle" element={<OracleDashboard />} />
+          <Route
+            path="/governance"
+            element={
+              account ? (
+                <GovernancePage signer={signer} />
+              ) : (
+                <VStack spacing={4} py={8}>
+                  <Heading size="md" textAlign="center">
+                    Please connect your wallet to view governance.
+                  </Heading>
+                </VStack>
+              )
+            }
+          />
         </Routes>
       </VStack>
     </Container>
