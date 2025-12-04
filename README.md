@@ -660,64 +660,60 @@ A user can go from **document → verified NFT → listed for sale** in minutes 
 
 ### **System Flow Diagram**
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                        USER INTERFACE                       │
-│  ┌──────────────────┐  ┌──────────────────┐  ┌────────────┐ │
-│  │ Document Type    │→ │ File Upload      │→ │ Analysis   │ │
-│  │ Selector         │  │ (Drag & Drop)    │  │ Button     │ │
-│  └──────────────────┘  └──────────────────┘  └────────────┘ │
-└───────────────────────────────┬─────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                        BACKEND (Flask)                      │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │ 1. Receive: file + document_type + owner_address     │   │
-│  │ 2. Generate focused AI prompt based on type          │   │
-│  │ 3. Send to Gemini AI 2.5 Pro                         │   │
-│  │ 4. Scan for QR codes in document                     │   │
-│  │ 5. Parse and validate AI response                    │   │
-│  │ 6. Upload metadata to IPFS (get hash)                │   │
-│  │ 7. Call AriaNFT contract’s mint function             │   │
-│  │ 8. Return: txId, ipfs_link, document_metadata        │   │
-│  └──────────────────────────────────────────────────────┘   │
-└───────────────────────────────┬─────────────────────────────┘
-                                │
-                    ┌───────────┴───────────┐
-                    ▼                       ▼
-        ┌─────────────────────┐ ┌─────────────────────┐
-        │   IPFS (Pinata)     │ │   QIE Blockchain    │
-        │                     │ │                     │
-        │ • Store metadata    │ │ • Mint NFT (ERC721) │
-        │ • Generate hash     │ │ • Store token URI   │
-        │ • Return IPFS URL   │ │ • Record token ID   │
-        └─────────────────────┘ └─────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    POST-MINT INTERFACE                      │
-│                      (Set Name, Choose Path)                │
-└──────────────┬──────────────────────────────────────────────┘
-               │
-   ┌───────────┴────────────┬────────────────────────┐
-   ▼                        ▼                        ▼
-┌─────────────────────┐ ┌──────────────────────┐ ┌─────────────────────┐
-│ MARKETPLACE CONTRACT│ │FRACTIONALNFT CONTRACT│ │      QIEDEX (DEX)   │
-│ (List/Sell ERC721)  │ │(Lock ERC721, Mint    │ │ (Trade ERC20        │
-│                     │ │  ERC20 Fractions)    │ │  Fractions)         │
-└─────────────────────┘ └──────────────────────┘ └─────────────────────┘
-                        │
-                        ▼
-┌───────────────────────────────────────────────┐
-│ ORACLE INTEGRATION LAYER                      │
-│ (Hybrid Pricing Logic - NEW)                  │
-│                                               │
-│ • Fetch ARIA/USD live price from Oracle       │
-│ • Convert USD → ARIA at purchase time         │
-│ • Oracle toggle: enable/disable fallback mode │
-└───────────────────────────────────────────────┘
+```mermaid
+graph TD
+    %% Styling
+    classDef primary fill:#6b46c1,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef secondary fill:#2d3748,stroke:#4a5568,stroke-width:1px,color:#fff;
+    classDef blockchain fill:#2b6cb0,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef ai fill:#c53030,stroke:#fff,stroke-width:2px,color:#fff;
 
+    subgraph UI [User Interface]
+        Selector[Document Type Selector]:::primary
+        Upload[File Upload]:::primary
+        AnalysisBtn[Analysis Button]:::primary
+    end
+
+    subgraph Backend [Backend Service]
+        Flask[Flask API]:::secondary
+        Prompt[Prompt Engineering]:::secondary
+        QR[QR Scanner]:::secondary
+    end
+
+    subgraph External [External Services]
+        Gemini[Gemini 2.5 Pro AI]:::ai
+        IPFS[IPFS Storage]:::secondary
+    end
+
+    subgraph Blockchain [QIE Network]
+        AriaNFT[AriaNFT Contract]:::blockchain
+        Marketplace[Marketplace Contract]:::blockchain
+        Fractional[FractionalNFT Contract]:::blockchain
+        Oracle[Oracle Contract]:::blockchain
+        QIEDEX[QIEDEX Liquidity]:::blockchain
+    end
+
+    %% Flow
+    Selector --> Upload
+    Upload --> AnalysisBtn
+    AnalysisBtn -->|1. File + Type| Flask
+
+    Flask -->|2. Generate Prompt| Prompt
+    Flask -->|3. Scan QR| QR
+    Prompt -->|4. Analyze| Gemini
+    Gemini -->|5. JSON Report| Flask
+
+    Flask -->|6. Upload Metadata| IPFS
+    IPFS -->|7. Hash| Flask
+
+    Flask -->|8. Mint NFT| AriaNFT
+
+    %% Post-Mint
+    AriaNFT -->|9. List| Marketplace
+    AriaNFT -->|9. Fractionalize| Fractional
+
+    Marketplace -.->|Fetch Price| Oracle
+    Fractional -.->|Create Pool| QIEDEX
 ```
 
 ### **Technology Stack**

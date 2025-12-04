@@ -73,8 +73,20 @@ const MarketplacePage = ({ provider, account }) => {
         let useDynamic = false;
         let pair = 'ARIA/USD';
         let priceInUSD_E8 = 0n;
+        let disputed = false;
 
-        // Try v2 shape first
+        // 1. Pre-check if listed using the public mapping (does not revert)
+        try {
+          const basic = await marketplace.listings(i);
+          // In Ethers v6, struct members are accessible by name if ABI has them
+          const basicSeller = basic.seller || basic[0];
+          if (!basicSeller || basicSeller === ethers.ZeroAddress) continue;
+        } catch (err) {
+          // If this fails, likely network or ABI issue, skip
+          continue;
+        }
+
+        // 2. Fetch full details (safe now because we know it's listed)
         try {
           const d = await marketplace.getListingDetails(i);
           seller = d[0];
@@ -84,20 +96,10 @@ const MarketplacePage = ({ provider, account }) => {
           useDynamic = Boolean(d[4]);
           pair = d[5];
           priceInUSD_E8 = BigInt(d[6]);
+          disputed = Boolean(d[7]);
         } catch (e) {
-          // Fallback to legacy
-          try {
-            const legacy = await marketplace.listings(i);
-            seller = legacy.seller ?? legacy[0];
-            staticPriceWei = BigInt(legacy.price ?? legacy[1] ?? 0n);
-            currentPriceWei = staticPriceWei;
-            name = legacy.name ?? `NFT #${i}`;
-            useDynamic = false;
-            pair = 'ARIA/USD';
-            priceInUSD_E8 = 0n;
-          } catch {
-            continue;
-          }
+          console.warn(`getListingDetails failed for ${i} despite pre-check:`, e);
+          continue;
         }
 
         if (!seller || seller === ethers.ZeroAddress) continue;
@@ -146,6 +148,7 @@ const MarketplacePage = ({ provider, account }) => {
           pair,
           metadata,
           ipfsLink,
+          disputed,
         });
       }
 
@@ -317,11 +320,12 @@ const MarketplacePage = ({ provider, account }) => {
             const isPurchasing = purchasing === l.tokenId;
 
             return (
-              <Box key={l.tokenId} p={5} shadow="md" borderWidth="1px" borderRadius="md" bg="gray.700">
+              <Box key={l.tokenId} p={5} shadow="md" borderWidth={l.disputed ? "2px" : "1px"} borderColor={l.disputed ? "red.500" : "inherit"} borderRadius="md" bg="gray.700">
                 <VStack spacing={3} align="stretch">
                   <HStack justify="space-between" width="100%">
                     <Badge colorScheme="purple">#{l.tokenId}</Badge>
                     <HStack>
+                      {l.disputed && <Badge colorScheme="red">SUSPICIOUS</Badge>}
                       <Badge colorScheme={l.mode === 'USD_PEGGED' ? 'blue' : 'purple'}>
                         {l.mode === 'USD_PEGGED' ? 'USD-Pegged' : 'Static ARIA'}
                       </Badge>
@@ -402,14 +406,14 @@ const MarketplacePage = ({ provider, account }) => {
 
                   {!isOwnNFT && (
                     <Button
-                      colorScheme="teal"
+                      colorScheme={l.disputed ? "red" : "teal"}
                       size="sm"
                       width="100%"
                       onClick={() => handleBuy(l.tokenId, effectiveAriaToPay, l.seller)}
-                      isDisabled={!canAfford || isPurchasing || effectiveAriaToPay <= 0}
+                      isDisabled={!canAfford || isPurchasing || effectiveAriaToPay <= 0 || l.disputed}
                       isLoading={isPurchasing}
                     >
-                      {isPurchasing ? 'Purchasing...' : canAfford ? 'Buy Now' : 'Insufficient Balance'}
+                      {l.disputed ? 'Suspicious Asset (Locked)' : (isPurchasing ? 'Purchasing...' : canAfford ? 'Buy Now' : 'Insufficient Balance')}
                     </Button>
                   )}
 
@@ -419,7 +423,7 @@ const MarketplacePage = ({ provider, account }) => {
                     </Button>
                   )}
 
-                  {!canAfford && !isOwnNFT && (
+                  {!canAfford && !isOwnNFT && !l.disputed && (
                     <Button colorScheme="orange" size="xs" width="100%" onClick={handleMintAriaButton}>
                       Mint ARIA to Buy
                     </Button>

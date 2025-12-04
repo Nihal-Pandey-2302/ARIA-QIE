@@ -12,13 +12,21 @@ import {
   StatLabel,
   StatNumber,
   StatHelpText,
+  StatArrow,
   Divider,
+  SimpleGrid,
+  Card,
+  CardHeader,
+  CardBody,
   Badge,
   Icon,
   Spinner,
-  useToast
+  useToast,
+  Container,
+  Flex,
+  Tooltip
 } from '@chakra-ui/react';
-import { Activity, TrendingUp, RefreshCcw } from 'lucide-react';
+import { Activity, TrendingUp, RefreshCcw, DollarSign, Globe, Database, Server, Zap } from 'lucide-react';
 import { BACKEND_URL } from '../constants';
 
 const OracleDashboard = () => {
@@ -89,97 +97,177 @@ const OracleDashboard = () => {
   }, []);
 
   return (
-    <Box p={8} maxW="800px" mx="auto">
-      <Heading size="lg" mb={4}>🔮 A.R.I.A. Oracle Dashboard</Heading>
-      <Text color="gray.400" mb={8}>
-        Live data feed and conversion engine powered by the QIE Oracle Network
-      </Text>
-
-      {/* LIVE Price Card */}
-      <Box
-        p={6}
-        borderWidth="1px"
-        borderRadius="lg"
-        bg="gray.800"
-        mb={8}
-      >
-        <HStack justify="space-between" mb={3}>
-          <Stat>
-            <StatLabel>ARIA/USD</StatLabel>
-            <StatNumber>
-              {price !== null ? `$${price.toFixed(2)}` : <Spinner size="sm" />}
-            </StatNumber>
-            <StatHelpText>Live price feed</StatHelpText>
-          </Stat>
-          <Badge colorScheme="green" variant="subtle" p={2} borderRadius="md">
-            <HStack>
-              <Icon as={Activity} boxSize={4} />
-              <Text fontSize="sm">LIVE</Text>
+    <Container maxW="container.xl" py={10}>
+      <VStack spacing={8} align="stretch">
+        {/* Header Section */}
+        <Box textAlign="center" mb={4}>
+          <Badge colorScheme="purple" mb={2} px={3} py={1} borderRadius="full">
+            <HStack spacing={1}>
+              <Icon as={Zap} size={12} />
+              <Text fontSize="xs" fontWeight="bold">POWERED BY QIE NETWORK</Text>
             </HStack>
           </Badge>
-        </HStack>
-        <Button
-          leftIcon={<RefreshCcw size={16} />}
-          colorScheme="purple"
-          size="sm"
-          onClick={fetchPrice}
-        >
-          Refresh
-        </Button>
-      </Box>
-
-      {/* Currency Converter */}
-      <Box p={6} borderWidth="1px" borderRadius="lg" bg="gray.800" mb={8}>
-        <Heading size="md" mb={4}>💱 Currency Converter</Heading>
-        <HStack mb={3}>
-          <Input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount"
-            bg="gray.700"
-          />
-          <Select value={from} onChange={(e) => setFrom(e.target.value)} bg="gray.700">
-            <option value="INR">INR</option>
-            <option value="USD">USD</option>
-            <option value="ARIA">ARIA</option>
-          </Select>
-          <Select value={to} onChange={(e) => setTo(e.target.value)} bg="gray.700">
-            <option value="USD">USD</option>
-            <option value="INR">INR</option>
-            <option value="ARIA">ARIA</option>
-          </Select>
-          <Button
-            colorScheme="purple"
-            onClick={handleConvert}
-            isLoading={loading}
-          >
-            Convert
-          </Button>
-        </HStack>
-        {conversion && (
-          <Text mt={2}>
-            💰 Result: <b>{conversion}</b> {to}
+          <Heading size="2xl" bgGradient="linear(to-r, purple.400, blue.400)" bgClip="text" mb={2}>
+            Oracle Command Center
+          </Heading>
+          <Text fontSize="lg" color="gray.400" maxW="2xl" mx="auto">
+            Real-time price feeds, currency conversion, and network status monitoring for the A.R.I.A. ecosystem.
           </Text>
-        )}
-      </Box>
+        </Box>
 
-      {/* Oracle Status */}
-      <Box p={6} borderWidth="1px" borderRadius="lg" bg="gray.800">
-        <Heading size="md" mb={4}>⚙️ Oracle Status</Heading>
-        {status ? (
-          <VStack align="start" spacing={1}>
-            <Text><b>Provider:</b> {status.provider}</Text>
-            <Text><b>Enabled:</b> {status.enabled ? '✅ Active' : '❌ Inactive'}</Text>
-            <Text><b>Cache TTL:</b> {status.cacheTTL}s</Text>
-            <Text><b>Cache Size:</b> {status.cacheSize}</Text>
-            <Text><b>Available Pairs:</b> {status.availablePairs.join(', ')}</Text>
-          </VStack>
-        ) : (
-          <Spinner />
-        )}
-      </Box>
-    </Box>
+        {/* Main Grid */}
+        <SimpleGrid columns={{ base: 1, lg: 3 }} spacing={8}>
+          
+          {/* 1. Live Price Feed Card */}
+          <Card bg="gray.800" borderColor="purple.500" borderWidth="1px" boxShadow="0 0 20px rgba(128, 90, 213, 0.15)">
+            <CardHeader pb={0}>
+              <Flex justify="space-between" align="center">
+                <HStack>
+                  <Icon as={Activity} color="purple.400" />
+                  <Heading size="md">Live Feed</Heading>
+                </HStack>
+                <Badge colorScheme="green" variant="solid" px={2} borderRadius="md">
+                  ACTIVE
+                </Badge>
+              </Flex>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={4} align="stretch">
+                <Stat>
+                  <StatLabel color="gray.400">ARIA / USD</StatLabel>
+                  <StatNumber fontSize="4xl" fontWeight="bold">
+                    {price !== null ? `$${price.toFixed(2)}` : <Spinner size="sm" color="purple.500" />}
+                  </StatNumber>
+                  <StatHelpText>
+                    <StatArrow type="increase" />
+                    Updated just now
+                  </StatHelpText>
+                </Stat>
+                <Divider borderColor="gray.700" />
+                <HStack justify="space-between" fontSize="sm" color="gray.400">
+                  <Text>Source: QIE Oracle</Text>
+                  <Text>Confidence: 100%</Text>
+                </HStack>
+                <Button
+                  leftIcon={<RefreshCcw size={16} />}
+                  colorScheme="purple"
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchPrice}
+                  _hover={{ bg: "purple.900" }}
+                >
+                  Force Refresh
+                </Button>
+              </VStack>
+            </CardBody>
+          </Card>
+
+          {/* 2. Currency Converter Card */}
+          <Card bg="gray.800" borderColor="gray.700" borderWidth="1px">
+            <CardHeader pb={0}>
+              <HStack>
+                <Icon as={DollarSign} color="green.400" />
+                <Heading size="md">Converter</Heading>
+              </HStack>
+            </CardHeader>
+            <CardBody>
+              <VStack spacing={4}>
+                <Input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Amount"
+                  size="lg"
+                  bg="gray.900"
+                  border="none"
+                  _focus={{ ring: 2, ringColor: "purple.500" }}
+                />
+                <HStack width="100%">
+                  <Select value={from} onChange={(e) => setFrom(e.target.value)} bg="gray.700" size="lg">
+                    <option value="INR">INR (₹)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="ARIA">ARIA</option>
+                    <option value="ETH">ETH</option>
+                  </Select>
+                  <Icon as={TrendingUp} color="gray.500" />
+                  <Select value={to} onChange={(e) => setTo(e.target.value)} bg="gray.700" size="lg">
+                    <option value="USD">USD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="ARIA">ARIA</option>
+                    <option value="ETH">ETH</option>
+                  </Select>
+                </HStack>
+                <Button
+                  colorScheme="green"
+                  width="100%"
+                  size="lg"
+                  onClick={handleConvert}
+                  isLoading={loading}
+                  loadingText="Calculating..."
+                >
+                  Convert Value
+                </Button>
+                {conversion && (
+                  <Box width="100%" p={3} bg="green.900" borderRadius="md" textAlign="center">
+                    <Text fontSize="sm" color="green.200">Result</Text>
+                    <Text fontSize="2xl" fontWeight="bold" color="white">
+                      {Number(conversion).toLocaleString(undefined, { maximumFractionDigits: 4 })} {to}
+                    </Text>
+                  </Box>
+                )}
+              </VStack>
+            </CardBody>
+          </Card>
+
+          {/* 3. System Status Card */}
+          <Card bg="gray.800" borderColor="gray.700" borderWidth="1px">
+            <CardHeader pb={0}>
+              <HStack>
+                <Icon as={Server} color="blue.400" />
+                <Heading size="md">System Status</Heading>
+              </HStack>
+            </CardHeader>
+            <CardBody>
+              {status ? (
+                <VStack align="stretch" spacing={4}>
+                  <HStack justify="space-between">
+                    <Text color="gray.400">Provider</Text>
+                    <Badge colorScheme="blue">{status.provider}</Badge>
+                  </HStack>
+                  <HStack justify="space-between">
+                    <Text color="gray.400">Operational</Text>
+                    <Badge colorScheme={status.enabled ? "green" : "red"}>
+                      {status.enabled ? 'ONLINE' : 'OFFLINE'}
+                    </Badge>
+                  </HStack>
+                  <HStack justify="space-between">
+                    <Text color="gray.400">Cache TTL</Text>
+                    <Text fontWeight="bold">{status.cacheTTL}s</Text>
+                  </HStack>
+                  <HStack justify="space-between">
+                    <Text color="gray.400">Cached Pairs</Text>
+                    <Text fontWeight="bold">{status.cacheSize}</Text>
+                  </HStack>
+                  <Box pt={2}>
+                    <Text fontSize="xs" color="gray.500" mb={2}>SUPPORTED PAIRS</Text>
+                    <Flex gap={2} flexWrap="wrap">
+                      {status.availablePairs.map(pair => (
+                        <Badge key={pair} variant="outline" colorScheme="gray">{pair}</Badge>
+                      ))}
+                    </Flex>
+                  </Box>
+                </VStack>
+              ) : (
+                <Flex justify="center" align="center" height="200px">
+                  <Spinner size="xl" color="blue.500" />
+                </Flex>
+              )}
+            </CardBody>
+          </Card>
+
+        </SimpleGrid>
+      </VStack>
+    </Container>
   );
 };
 
