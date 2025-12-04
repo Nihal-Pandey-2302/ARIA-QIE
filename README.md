@@ -28,6 +28,9 @@
 
 ---
 
+<details>
+<summary><strong>🎯 The Problem We're Solving</strong></summary>
+
 ## 🎯 The Problem We're Solving
 
 The **$2 Trillion+ Real-World Asset (RWA)** market faces critical challenges:
@@ -40,7 +43,12 @@ The **$2 Trillion+ Real-World Asset (RWA)** market faces critical challenges:
 
 **A.R.I.A. eliminates ALL of these bottlenecks.**
 
+</details>
+
 ---
+
+<details>
+<summary><strong>💡 Our Solution</strong></summary>
 
 ## 💡 Our Solution
 
@@ -79,7 +87,12 @@ Support for **8+ document types** with automatic AI classification and focused a
 - **⚖️ Governance & Disputes** - Community-driven fraud detection and asset flagging
 - **💰 Staking Rewards System** - Earn fees from the protocol
 
+</details>
+
 ---
+
+<details>
+<summary><strong>📸 Application Walkthrough</strong></summary>
 
 ## 📸 Application Walkthrough
 
@@ -442,6 +455,8 @@ This page is currently built for **developer & testing purposes**, enabling dyna
 
 **Why It Matters:**  
 This dashboard ensures the **dynamic pricing engine is stable, reliable, and production-ready** before connecting to live QIE oracle feeds — reducing risk and improving safety of real-world value trading.
+
+</details>
 
 ---
 
