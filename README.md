@@ -92,6 +92,140 @@ Support for **8+ document types** with automatic AI classification and focused a
 ---
 
 <details>
+<summary><strong>🏗️ Technical Architecture</strong></summary>
+
+## 🏗️ Technical Architecture
+
+### **System Flow Diagram**
+
+```mermaid
+graph TD
+    %% Styling
+    classDef primary fill:#6b46c1,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef secondary fill:#2d3748,stroke:#4a5568,stroke-width:1px,color:#fff;
+    classDef blockchain fill:#2b6cb0,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef ai fill:#c53030,stroke:#fff,stroke-width:2px,color:#fff;
+
+    subgraph UI [User Interface]
+        Selector[Document Type Selector]:::primary
+        Upload[File Upload]:::primary
+        AnalysisBtn[Analysis Button]:::primary
+    end
+
+    subgraph Backend [Backend Service]
+        Flask[Flask API]:::secondary
+        Prompt[Prompt Engineering]:::secondary
+        QR[QR Scanner]:::secondary
+    end
+
+    subgraph External [External Services]
+        Gemini[Gemini 2.5 Pro AI]:::ai
+        IPFS[IPFS Storage]:::secondary
+    end
+
+    subgraph Blockchain [QIE Network]
+        AriaNFT[AriaNFT Contract]:::blockchain
+        Marketplace[Marketplace Contract]:::blockchain
+        Fractional[FractionalNFT Contract]:::blockchain
+        Oracle[Oracle Contract]:::blockchain
+        QIEDEX[QIEDEX Liquidity]:::blockchain
+    end
+
+    %% Flow
+    Selector --> Upload
+    Upload --> AnalysisBtn
+    AnalysisBtn -->|1. File + Type| Flask
+
+    Flask -->|2. Generate Prompt| Prompt
+    Flask -->|3. Scan QR| QR
+    Prompt -->|4. Analyze| Gemini
+    Gemini -->|5. JSON Report| Flask
+
+    Flask -->|6. Upload Metadata| IPFS
+    IPFS -->|7. Hash| Flask
+
+    Flask -->|8. Mint NFT| AriaNFT
+
+    %% Post-Mint
+    AriaNFT -->|9. List| Marketplace
+    AriaNFT -->|9. Fractionalize| Fractional
+
+    Marketplace -.->|Fetch Price| Oracle
+    Fractional -.->|Create Pool| QIEDEX
+```
+
+### **Technology Stack**
+
+#### **Frontend**
+
+- **Framework**: React 18 with Vite
+- **UI Library**: Chakra UI (custom dark theme)
+- **Blockchain**: Ethers.js v6
+- **File Handling**: React Dropzone
+- **State Management**: React Hooks
+- **Routing**: React Router v6
+- **Developer Tools**:
+  - ✅ **Oracle Dashboard UI** (for testing pricing flows)
+
+#### **Backend**
+
+- **Language**: Python 3.9+
+- **Framework**: Flask + CORS
+- **AI Engine**: Google Gemini 2.5 Pro API
+- **Image Processing**: OpenCV + PIL for QR scanning
+- **PDF Handling**: pypdf
+- **Blockchain**: Web3.py
+- **Storage**: IPFS (Pinata API)
+
+#### **Smart Contracts**
+
+- **Language**: Solidity 0.8.20
+- **Standards**: ERC-721 (NFTs), ERC-20 (ARIA Token), QIE20 (Fraction Tokens)
+- **Security**: OpenZeppelin, ReentrancyGuard
+- **Core Contracts**:
+
+  - `AriaNFT.sol` — Core RWA NFT (ERC721)
+  - `AriaToken.sol` — ARIA Utility Token (ERC20)
+  - `AriaMarketplace.sol` — Whole NFT sales with **Static ARIA + USD-Pegged Pricing**
+  - `FractionalNFT.sol` — NFT escrow & fractional ERC20 factory
+  - `IQIEOracle.sol` — Dev/test oracle for ARIA/USD price feed _(mainnet-ready)_
+
+- **Pricing Logic Built-In**
+
+  - USD-pegged price stored in **1e8 precision**
+  - Converts at runtime using oracle feed
+
+- **Development**: Hardhat
+- **Deployment Targets**:
+  - QIE Local Dev Network
+  - QIE Testnet (Deployed)
+  - QIE Mainnet (Planned)
+
+#### **Deployed Contracts (QIE Testnet)**
+
+| Contract          | Address                                      |
+| ----------------- | -------------------------------------------- |
+| **AriaToken**     | `0xaE2a6140DC27a73501eb3e26e656fA5Cfd8dec3e` |
+| **AriaNFT**       | `0xA1396CAe4A1Bf6C7Bd2e322F916967905E8d85e4` |
+| **Marketplace**   | `0xD504D75D5ebfaBEfF8d35658e85bbc52CC66d880` |
+| **FractionalNFT** | `0x3e2B64f8d927447C370CD6a84FAdf92f6B95C806` |
+| **MockOracle**    | `0xf37F527E7b50A07Fa7fd49D595132a1f2fDC5f98` |
+
+#### **Infrastructure**
+
+- **Blockchain**: QIE Network (25K+ TPS, ~3s finality, 80% gas burn)
+- **IPFS**: Pinata Gateway
+- **Wallets**: MetaMask + QIE Wallet
+- **Hosting**:
+  - Frontend — Vercel
+  - Backend — Render
+  - Oracle UI — Local Dev Tool (optional)
+
+</details>
+
+---
+
+<details>
 <summary><strong>📸 Application Walkthrough</strong></summary>
 
 ## 📸 Application Walkthrough
