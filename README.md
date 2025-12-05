@@ -1351,16 +1351,11 @@ Special thanks to:
 ---
 
 <p align="center">
-  <strong>Built with ❤️ for the QIE Blockchain Hackathon 2025</strong><br>
+  <strong>Built for the QIE Blockchain Hackathon 2025</strong><br>
   <em>Democratizing RWA Verification, One Document at a Time</em>
 </p>
 
-<p align="center">
-  <a href="https://qie.digital">QIE Blockchain</a> •
-  <a href="https://dex.qie.digital">QIEDEX</a> •
-  <a href="https://oracles.qie.digital">QIE Oracles</a> •
-  <a href="https://explorer.qie.digital">Block Explorer</a>
-</p>
+
 
 ---
 
@@ -1376,7 +1371,7 @@ Special thanks to:
 - 🌍 **100% Decentralized** storage (IPFS)
 - 🔥 **80% Gas Burn** deflationary
 - 📊 **Live Oracles** dynamic pricing
-- 🎯 **Production Ready** deployed on mainnet
+
 
 </details>
 
