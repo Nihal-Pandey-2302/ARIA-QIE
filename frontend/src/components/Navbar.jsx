@@ -7,7 +7,6 @@ import { Activity } from 'lucide-react';
 const Navbar = () => {
   const activeLinkColor = useColorModeValue("purple.500", "purple.200");
   const inactiveLinkColor = useColorModeValue("gray.600", "gray.400");
-  const futureLinkColor = useColorModeValue("gray.400", "gray.600");
 
   const activeStyle = {
     fontWeight: 'bold',

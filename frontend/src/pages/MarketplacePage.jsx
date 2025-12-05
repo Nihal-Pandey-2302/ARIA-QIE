@@ -81,7 +81,7 @@ const MarketplacePage = ({ provider, account }) => {
           // In Ethers v6, struct members are accessible by name if ABI has them
           const basicSeller = basic.seller || basic[0];
           if (!basicSeller || basicSeller === ethers.ZeroAddress) continue;
-        } catch (err) {
+        } catch {
           // If this fails, likely network or ABI issue, skip
           continue;
         }
@@ -133,9 +133,9 @@ const MarketplacePage = ({ provider, account }) => {
         // Pull backend live info (for USD-pegged baseline and multi-currency)
         const live = await fetchLiveBackend(Number(i));
         const liveAria = live?.currentPrice ?? (useDynamic ? currentAria : staticAria);
-        const displayUSD = useDynamic
-          ? (usdTarget || live?.priceInUSD || 0)
-          : (live?.priceInUSD || (staticAria * (live?.prices?.USD ?? 0) / (live?.prices?.ARIA ?? 1)) || 0);
+        // const displayUSD = useDynamic
+        //   ? (usdTarget || live?.priceInUSD || 0)
+        //   : (live?.priceInUSD || (staticAria * (live?.prices?.USD ?? 0) / (live?.prices?.ARIA ?? 1)) || 0);
 
         items.push({
           tokenId: Number(i),

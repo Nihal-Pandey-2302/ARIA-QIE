@@ -34,20 +34,42 @@ else:
 app = Flask(__name__)
 CORS(app)
 
-# --- API KEY CONFIGURATION ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    print("CRITICAL ERROR: GEMINI_API_KEY not found in environment!")
-    # Fallback for library default
-    GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
+import random
 
-PINATA_API_KEY = os.getenv("PINATA_API_KEY")
+# --- API KEY CONFIGURATION ---
+# Support multiple keys for rotation to avoid rate limits
+GEMINI_API_KEYS = []
+keys_str = os.getenv("GEMINI_API_KEYS")
+if keys_str:
+    GEMINI_API_KEYS = [k.strip() for k in keys_str.split(',') if k.strip()]
+
+# Fallback to single key if no list provided
+if not GEMINI_API_KEYS:
+    single_key = os.getenv("GEMINI_API_KEY")
+    if single_key:
+        GEMINI_API_KEYS.append(single_key)
+    else:
+        # Fallback for library default
+        google_key = os.getenv("GOOGLE_API_KEY")
+        if google_key:
+            GEMINI_API_KEYS.append(google_key)
+
+if not GEMINI_API_KEYS:
+    print("CRITICAL ERROR: No Gemini API keys found in environment!")
+
 PINATA_API_KEY = os.getenv("PINATA_API_KEY")
 PINATA_SECRET_API_KEY = os.getenv("PINATA_SECRET_API_KEY")
 
 # --- GEMINI AI INITIALIZATION ---
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-2.5-pro')
+def get_configured_model():
+    """Configure GenAI with a random key from the pool to distribute load"""
+    if not GEMINI_API_KEYS:
+        raise Exception("No Gemini API keys available")
+    
+    selected_key = random.choice(GEMINI_API_KEYS)
+    # print(f"DEBUG: Using Gemini Key ending in ...{selected_key[-4:]}")
+    genai.configure(api_key=selected_key)
+    return genai.GenerativeModel('gemini-2.0-flash-exp') # Updated to faster model for hackathon
 
 # --- DOCUMENT TYPE DEFINITIONS WITH FOCUSED ANALYSIS ---
 DOCUMENT_TYPES = {
@@ -277,6 +299,9 @@ def analyze_and_mint():
         ]
         
         app.logger.info(f"Analyzing {doc_info['name']}: {document_file.filename}")
+        
+        # Get model with rotated key
+        model = get_configured_model()
         response = model.generate_content(contents)
         
         # Parse AI response

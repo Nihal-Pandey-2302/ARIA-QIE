@@ -44,7 +44,7 @@ export default function GovernancePage({ signer }) {
               disputed: details[7] // The new boolean
             });
           }
-        } catch (e) {
+        } catch {
           // likely not listed
         }
       }

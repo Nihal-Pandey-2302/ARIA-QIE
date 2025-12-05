@@ -4,7 +4,7 @@ import {
   Box, Heading, Text, VStack, Button, Input, InputGroup, InputRightAddon, Spinner, Stat, StatLabel, StatNumber, useToast, SimpleGrid, Divider 
 } from '@chakra-ui/react';
 import { openContractCall } from '@stacks/connect';
-import { cvToJSON, uintCV, standardPrincipalCV, FungibleConditionCode, Pc } from '@stacks/transactions';
+import { uintCV, standardPrincipalCV, FungibleConditionCode, Pc } from '@stacks/transactions';
 import { userSession } from '../App';
 import { 
   STACKS_NETWORK, DEPLOYER_ADDRESS, STAKING_CONTRACT_ID, ARIA_TOKEN_CONTRACT_ID, TOKEN_DISPLAY, DENOM_DECIMALS 

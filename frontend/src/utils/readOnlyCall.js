@@ -1,5 +1,6 @@
 // src/utils/readOnlyCall.js
 import { serializeCV, cvToJSON } from '@stacks/transactions';
+import { Buffer } from 'buffer';
 import { STACKS_NETWORK } from '../constants';
 
 export async function readOnlyCall({ contractAddress, contractName, functionName, functionArgs, senderAddress }) {

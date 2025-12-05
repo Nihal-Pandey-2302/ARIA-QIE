@@ -1,5 +1,5 @@
 // src/components/FileUpload.jsx - WITH DOCUMENT TYPE SELECTOR
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { 
   Box, Text, Button, VStack, HStack, Icon, Badge, SimpleGrid, 
@@ -72,31 +72,28 @@ const FileUpload = ({
   isMinted
 }) => {
   const [selectedDocType, setSelectedDocType] = useState('');
-  const [supportedDocs, setSupportedDocs] = useState([]);
-  const [hoveredType, setHoveredType] = useState(null);
+  // const [supportedDocs, setSupportedDocs] = useState([]);
+  // const [hoveredType, setHoveredType] = useState(null);
   const toast = useToast();
 
   // Fetch supported document types from backend
+  /*
   useEffect(() => {
     const fetchSupportedDocs = async () => {
       try {
         const response = await fetch(`${BACKEND_URL}/supported_documents`);
         if (response.ok) {
           const data = await response.json();
-          setSupportedDocs(data.supported_types || []);
+          // setSupportedDocs(data.supported_types || []);
         }
       } catch (error) {
         console.error("Failed to fetch supported documents:", error);
-        // Fallback to hardcoded types if backend fails
-        setSupportedDocs(Object.keys(DOCUMENT_TYPES).map(key => ({
-          type: key,
-          ...DOCUMENT_TYPES[key]
-        })));
       }
     };
 
     fetchSupportedDocs();
   }, []);
+  */
 
   const onDrop = useCallback(acceptedFiles => {
     if (acceptedFiles.length > 0) {

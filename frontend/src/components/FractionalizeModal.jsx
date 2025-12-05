@@ -120,7 +120,7 @@ const FractionalizeModal = ({
     setLoading(true);
 
     try {
-      const userAddress = await signer.getAddress();
+      // const { userAddress } = useWallet(); signer.getAddress();
 
       // Step 1: Approve FractionalNFT contract to transfer NFT
       setStep(2);
