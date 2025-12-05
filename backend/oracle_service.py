@@ -23,32 +23,15 @@ class OracleService:
     # Initialize Web3
     w3 = Web3(Web3.HTTPProvider(PROVIDER_URL))
     
-    # ✅ AggregatorV3Interface ABI (standard Chainlink interface)
+    # ✅ SimpleOracle ABI (Custom Interface)
     ORACLE_ABI = [
         {
-            "inputs": [],
-            "name": "latestRoundData",
+            "inputs": [{"name": "pair", "type": "string"}],
+            "name": "getLatestPrice",
             "outputs": [
-                {"name": "roundId", "type": "uint80"},
-                {"name": "answer", "type": "int256"},
-                {"name": "startedAt", "type": "uint256"},
-                {"name": "updatedAt", "type": "uint256"},
-                {"name": "answeredInRound", "type": "uint80"}
+                {"name": "price", "type": "int256"},
+                {"name": "timestamp", "type": "uint256"}
             ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "decimals",
-            "outputs": [{"name": "", "type": "uint8"}],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "description",
-            "outputs": [{"name": "", "type": "string"}],
             "stateMutability": "view",
             "type": "function"
         }
@@ -57,7 +40,12 @@ class OracleService:
     @classmethod
     def get_oracle_contract(cls):
         """Get oracle contract instance"""
-        if not cls.ORACLE_ADDRESS or cls.ORACLE_ADDRESS == "":
+        # Use address from contract_info if env var not set, or fallback
+        if not cls.ORACLE_ADDRESS:
+            from contract_info import ORACLE_ADDRESS
+            cls.ORACLE_ADDRESS = ORACLE_ADDRESS
+
+        if not cls.ORACLE_ADDRESS:
             print("⚠️ Oracle address not set")
             return None
         
@@ -77,14 +65,14 @@ class OracleService:
     @classmethod
     def get_price_from_oracle(cls, pair: str = "ARIA/USD") -> Optional[Dict]:
         """
-        Fetch price from QIE Oracle (AggregatorV3 compatible)
+        Fetch price from QIE Oracle (SimpleOracle)
         Falls back to mock if unavailable
         """
         # Check cache
         if pair in cls.price_cache:
             cached = cls.price_cache[pair]
             if time.time() - cached['fetched_at'] < cls.CACHE_TTL:
-                print(f"📦 Cache hit for {pair}")
+                # print(f"📦 Cache hit for {pair}")
                 return cached
         
         # Try real oracle (Only for ARIA/USD since we only deployed one)
@@ -94,12 +82,11 @@ class OracleService:
                 try:
                     print(f"🔮 Fetching {pair} from QIE Oracle...")
                     
-                    # Call latestRoundData() - standard AggregatorV3 function
-                    (roundId, answer, startedAt, updatedAt, answeredInRound) = \
-                        oracle.functions.latestRoundData().call()
+                    # Call getLatestPrice(pair) - SimpleOracle function
+                    (answer, updatedAt) = oracle.functions.getLatestPrice(pair).call()
                     
-                    # Get decimals
-                    decimals = oracle.functions.decimals().call()
+                    # SimpleOracle uses 8 decimals by default (from our deployment script)
+                    decimals = 8
                     
                     # Convert to float
                     price_float = answer / (10 ** decimals)
@@ -109,13 +96,13 @@ class OracleService:
                         "price": price_float,
                         "decimals": decimals,
                         "timestamp": updatedAt,
-                        "roundId": roundId,
+                        "roundId": 0, # Not used in SimpleOracle
                         "fetched_at": time.time(),
-                        "source": "QIE Oracle (AggregatorV3)"
+                        "source": "QIE Oracle (Simple)"
                     }
                     
                     cls.price_cache[pair] = price_data
-                    print(f"✅ Got {pair}: ${price_float} (Round {roundId})")
+                    print(f"✅ Got {pair}: ${price_float}")
                     return price_data
                     
                 except Exception as e:

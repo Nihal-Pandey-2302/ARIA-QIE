@@ -209,7 +209,7 @@ graph TD
 | **AriaNFT**       | `0xA1396CAe4A1Bf6C7Bd2e322F916967905E8d85e4` |
 | **Marketplace**   | `0xD504D75D5ebfaBEfF8d35658e85bbc52CC66d880` |
 | **FractionalNFT** | `0x3e2B64f8d927447C370CD6a84FAdf92f6B95C806` |
-| **MockOracle**    | `0xf37F527E7b50A07Fa7fd49D595132a1f2fDC5f98` |
+| **MockOracle**    | `0x43F7E04ED1b6F0BdD0cD5E595D37F454A03dB78c` |
 
 #### **Infrastructure**
 
