@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 import os
 import json
 from flask_cors import CORS
-from pyzbar.pyzbar import decode
-from PIL import Image
 import cv2
 import numpy as np
 import pypdf
@@ -146,27 +144,10 @@ def upload_to_ipfs(json_data: dict) -> tuple:
     
     return (f"https://gateway.pinata.cloud/ipfs/{ipfs_hash_only}", ipfs_hash_only)
 
-def find_and_decode_qr(document_bytes, mime_type):
-    """Attempt to find and decode QR codes in document"""
-    try:
-        if "pdf" in mime_type.lower():
-            pdf_file = pypdf.PdfReader(io.BytesIO(document_bytes))
-            for page in pdf_file.pages:
-                for image_file_object in page.images:
-                    img = Image.open(io.BytesIO(image_file_object.data))
-                    decoded_objects = decode(img)
-                    if decoded_objects:
-                        return decoded_objects[0].data.decode("utf-8")
-        else:
-            img_array = np.frombuffer(document_bytes, np.uint8)
-            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-            decoded_objects = decode(img)
-            if decoded_objects:
-                return decoded_objects[0].data.decode("utf-8")
-        return None
-    except Exception as e:
-        app.logger.warning(f"QR Code Scan Warning: {e}")
-        return None
+# QR Code Logic Removed for Render Compatibility
+def find_and_decode_qr(image_bytes, mime_type):
+    """(Disabled) Placeholder for QR Code Scanning"""
+    return None
 
 # ✅ LOCAL FALLBACK REMOVED AS REQUESTED
 

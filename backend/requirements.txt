@@ -4,9 +4,6 @@ flask-cors
 python-dotenv
 google-generativeai
 requests
-pyzbar
-Pillow
-opencv-python-headless
 pypdf
 web3>=6.0.0
 gunicorn
