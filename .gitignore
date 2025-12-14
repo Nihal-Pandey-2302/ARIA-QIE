@@ -27,7 +27,7 @@
 # --- Contracts / Hardhat ---
 /contracts/node_modules
 /contracts/cache
-/contracts/artifacts
+
 /contracts/typechain
 /contracts/typechain-types
 /contracts/coverage
