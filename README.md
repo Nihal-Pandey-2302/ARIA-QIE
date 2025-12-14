@@ -904,10 +904,36 @@ This architecture demonstrates a **fully functional, self-hosted oracle network*
 
 #### **1. Clone Repository**
 
-```bash
+````bash
 git clone https://github.com/Nihal-Pandey-2302/ARIA-ON-QIE.git
 cd ARIA-ON-QIE
-```
+
+#### **2. Quick Start (Recommended)**
+
+Run the entire application (Backend + Frontend) with one command:
+
+```bash
+# Make script executable (first time only)
+chmod +x start_app.sh
+
+# Start the application
+./start_app.sh
+````
+
+- Backend runs on `http://localhost:5001`
+- Frontend runs on `http://localhost:5173`
+
+_(To stop the app, simply press `Ctrl+C`)_
+
+---
+
+#### **3. Manual Setup (Alternative)**
+
+If you prefer to run services manually:
+
+**Backend Setup**
+
+````
 
 #### **2. Backend Setup**
 
@@ -933,11 +959,11 @@ nano .env  # Edit with your API keys
 
 # Run backend server
 python app.py
-```
+````
 
 Backend will start on `http://localhost:5001`
 
-#### **3. Frontend Setup**
+**Frontend Setup**
 
 ```bash
 cd ../aria-frontend
@@ -958,7 +984,7 @@ npm run dev
 
 Frontend will start on `http://localhost:5173`
 
-#### **4. Connect Wallet**
+### **Connect Wallet**
 
 1. Install MetaMask or QIE Wallet browser extension
 2. Configure QIE network (add network details)
