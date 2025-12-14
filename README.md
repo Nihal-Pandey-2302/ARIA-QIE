@@ -10,13 +10,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Nihal-Pandey-2302/ARIA-ON-QIE" target="_blank">
+  <a href="https://github.com/Nihal-Pandey-2302/ARIA-QIE" target="_blank">
     <img src="https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github" alt="GitHub">
   </a>
   <a href="https://youtu.be/YAP8kjlP4CA" target="_blank">
     <img src="https://img.shields.io/badge/Watch-Video%20Demo-red?style=for-the-badge&logo=youtube" alt="Demo">
   </a>
-  <a href="https://aria-qie.vercel.app/marketplace" target="_blank">
+  <a href="https://aria-qie.vercel.app" target="_blank">
     <img src="https://img.shields.io/badge/Launch-Live%20dApp-5546ff?style=for-the-badge&logo=vercel" alt="Live">
   </a>
 </p>
