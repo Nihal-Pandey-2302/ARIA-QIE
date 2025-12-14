@@ -2,8 +2,6 @@
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import os
-import google.generativeai as genai
-import requests
 import json
 from flask_cors import CORS
 from pyzbar.pyzbar import decode
@@ -11,9 +9,12 @@ from PIL import Image
 import cv2
 import numpy as np
 import pypdf
+import requests
 import io
 from datetime import datetime
 import re
+from pypdf import PdfReader # ✅ Specific import needed for extraction logic
+from groq_service import GroqService # ✅ Import GroqService
 from oracle_service import OracleService
 from web3 import Web3
 from contract_info import ARIAMARKETPLACE_ADDRESS, ARIAMARKETPLACE_ABI, ORACLE_ADDRESS
@@ -39,37 +40,20 @@ import random
 # --- API KEY CONFIGURATION ---
 # Support multiple keys for rotation to avoid rate limits
 GEMINI_API_KEYS = []
-keys_str = os.getenv("GEMINI_API_KEYS")
-if keys_str:
-    GEMINI_API_KEYS = [k.strip() for k in keys_str.split(',') if k.strip()]
-
-# Fallback to single key if no list provided
-if not GEMINI_API_KEYS:
-    single_key = os.getenv("GEMINI_API_KEY")
-    if single_key:
-        GEMINI_API_KEYS.append(single_key)
-    else:
-        # Fallback for library default
-        google_key = os.getenv("GOOGLE_API_KEY")
-        if google_key:
-            GEMINI_API_KEYS.append(google_key)
-
-if not GEMINI_API_KEYS:
-    print("CRITICAL ERROR: No Gemini API keys found in environment!")
-
+# PINATA API keys are still needed
 PINATA_API_KEY = os.getenv("PINATA_API_KEY")
 PINATA_SECRET_API_KEY = os.getenv("PINATA_SECRET_API_KEY")
 
-# --- GEMINI AI INITIALIZATION ---
-def get_configured_model():
-    """Configure GenAI with a random key from the pool to distribute load"""
-    if not GEMINI_API_KEYS:
-        raise Exception("No Gemini API keys available")
-    
-    selected_key = random.choice(GEMINI_API_KEYS)
-    # print(f"DEBUG: Using Gemini Key ending in ...{selected_key[-4:]}")
-    genai.configure(api_key=selected_key)
-    return genai.GenerativeModel('gemini-2.0-flash-exp') # Updated to faster model for hackathon
+# ✅ NEW: Initialize Groq instead of Gemini
+try:
+    groq_service = GroqService()
+    if groq_service.client:
+        print("✅ Groq AI service initialized successfully")
+    else:
+        print("⚠️ Groq Service initialized but client is None (ApiKey missing?)")
+except Exception as e:
+    print(f"❌ Failed to initialize Groq: {e}")
+    groq_service = None
 
 # --- DOCUMENT TYPE DEFINITIONS WITH FOCUSED ANALYSIS ---
 DOCUMENT_TYPES = {
@@ -184,6 +168,8 @@ def find_and_decode_qr(document_bytes, mime_type):
         app.logger.warning(f"QR Code Scan Warning: {e}")
         return None
 
+# ✅ LOCAL FALLBACK REMOVED AS REQUESTED
+
 def generate_focused_prompt(doc_type: str) -> str:
     """Generate AI prompt focused on specific document type"""
     
@@ -286,28 +272,62 @@ def analyze_and_mint():
     try:
         # Read document bytes
         document_bytes = document_file.read()
-        
+
+        # EXTRACT TEXT FROM PDF (Since we are using Text-Based Llama 3.3)
+        extracted_text = ""
+        try:
+            # Check content type or filename
+            if "pdf" in document_file.content_type.lower() or document_file.filename.lower().endswith('.pdf'):
+                pdf_file = io.BytesIO(document_bytes)
+                reader = PdfReader(pdf_file)
+                for page in reader.pages:
+                    text_content = page.extract_text()
+                    if text_content:
+                        extracted_text += text_content + "\n"
+            else:
+                # Fallback implementation or warning for non-PDFs
+                # For images, we can't extract text without OCR libraries like Tesseract
+                # But for the demo, we assume PDFs.
+                extracted_text = "Non-PDF document provided. Analysis limited."
+                
+            if len(extracted_text) < 5:
+                # If extraction fails or is empty
+                extracted_text = "No machine-readable text found in document."
+                
+        except Exception as e:
+            app.logger.error(f"Text extraction failed: {e}")
+            extracted_text = "Error extracting text from document."
+
         # Get document info
         doc_info = DOCUMENT_TYPES[document_type]
         
         # Generate focused AI prompt
         prompt = generate_focused_prompt(document_type)
         
-        contents = [
-            {"mime_type": document_file.content_type, "data": document_bytes},
-            prompt
-        ]
+        app.logger.info(f"Analyzing {doc_info['name']}: {document_file.filename} using Llama 3.3")
         
-        app.logger.info(f"Analyzing {doc_info['name']}: {document_file.filename}")
-        
-        # Get model with rotated key
-        model = get_configured_model()
-        response = model.generate_content(contents)
-        
-        # Parse AI response
-        response_text = response.text.strip()
-        response_text = response_text.replace("```json", "").replace("```", "").strip()
-        ai_report_json = json.loads(response_text)
+        # Check Groq service
+        if not groq_service or not groq_service.client:
+             return jsonify({"error": "Groq Service unavailable"}), 503
+        else:
+            try:
+                # ✅ NEW: Analyze Text with Llama 3.3
+                response_text = groq_service.analyze_text(
+                    text_content=extracted_text,
+                    prompt=prompt
+                )
+                
+                # Parse AI response
+                response_text = response_text.strip()
+                response_text = response_text.replace("```json", "").replace("```", "").strip()
+                ai_report_json = json.loads(response_text)
+                
+                ai_report_json["ai_model"] = "Llama 3.3 70B (Groq)"
+
+            except Exception as e:
+                app.logger.error(f"Groq Analysis Failed: {e}")
+                return jsonify({"error": f"AI Analysis Failed: {str(e)}"}), 500
+
         
         # Ensure document_type is set correctly
         ai_report_json["document_type"] = document_type

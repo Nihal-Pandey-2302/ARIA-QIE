@@ -4,7 +4,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/QIE-Blockchain-5546ff?style=for-the-badge&logo=ethereum" alt="QIE Blockchain">
-  <img src="https://img.shields.io/badge/AI-Gemini%202.5%20Pro-blue?style=for-the-badge&logo=google" alt="Gemini AI">
+  <img src="https://img.shields.io/badge/AI-Groq%20Llama%203.3-orange?style=for-the-badge&logo=meta" alt="Groq AI">
   <img src="https://img.shields.io/badge/Storage-IPFS-65c2cb?style=for-the-badge&logo=ipfs" alt="IPFS">
   <img src="https://img.shields.io/badge/Stack-React%20%2B%20Python-green?style=for-the-badge" alt="Tech Stack">
 </p>
@@ -13,7 +13,7 @@
   <a href="https://github.com/Nihal-Pandey-2302/ARIA-ON-QIE" target="_blank">
     <img src="https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge&logo=github" alt="GitHub">
   </a>
-  <a href="#" target="_blank">
+  <a href="https://youtu.be/YAP8kjlP4CA" target="_blank">
     <img src="https://img.shields.io/badge/Watch-Video%20Demo-red?style=for-the-badge&logo=youtube" alt="Demo">
   </a>
   <a href="#" target="_blank">
@@ -300,7 +300,7 @@ Users see clear visual confirmation of their selection and understand exactly wh
 - Performance highlights at the bottom:
   - ⚡ 25,000+ TPS (QIE Blockchain Speed)
   - 🔥 Near-Zero Fees (80% Gas Burn)
-  - 🤖 AI Verified (Gemini 2.5 Pro)
+  - 🤖 AI Verified (Groq Llama 3.3)
 
 **User Confidence:**
 Clear progress indicators and detailed information build trust in the process. Users know exactly what will happen when they click the analyze button.
