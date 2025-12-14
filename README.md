@@ -119,7 +119,7 @@ graph TD
     end
 
     subgraph External [External Services]
-        Gemini[Gemini 2.5 Pro AI]:::ai
+        Groq[Groq Llama 3.3 AI]:::ai
         IPFS[IPFS Storage]:::secondary
     end
 
@@ -138,8 +138,8 @@ graph TD
 
     Flask -->|2. Generate Prompt| Prompt
     Flask -->|3. Scan QR| QR
-    Prompt -->|4. Analyze| Gemini
-    Gemini -->|5. JSON Report| Flask
+    Prompt -->|4. Analyze| Groq
+    Groq -->|5. JSON Report| Flask
 
     Flask -->|6. Upload Metadata| IPFS
     IPFS -->|7. Hash| Flask
@@ -171,7 +171,7 @@ graph TD
 
 - **Language**: Python 3.9+
 - **Framework**: Flask + CORS
-- **AI Engine**: Google Gemini 2.5 Pro API
+- **AI Engine**: Groq (Llama 3.3 70B)
 - **Image Processing**: OpenCV + PIL for QR scanning
 - **PDF Handling**: pypdf
 - **Blockchain**: Web3.py
@@ -1355,8 +1355,6 @@ Special thanks to:
   <em>Democratizing RWA Verification, One Document at a Time</em>
 </p>
 
-
-
 ---
 
 <details>
@@ -1371,7 +1369,6 @@ Special thanks to:
 - 🌍 **100% Decentralized** storage (IPFS)
 - 🔥 **80% Gas Burn** deflationary
 - 📊 **Live Oracles** dynamic pricing
-
 
 </details>
 
