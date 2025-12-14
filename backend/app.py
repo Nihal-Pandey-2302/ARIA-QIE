@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 import os
 import json
 from flask_cors import CORS
-import cv2
-import numpy as np
 import pypdf
 import requests
 import io
