@@ -16,7 +16,7 @@
   <a href="https://youtu.be/YAP8kjlP4CA" target="_blank">
     <img src="https://img.shields.io/badge/Watch-Video%20Demo-red?style=for-the-badge&logo=youtube" alt="Demo">
   </a>
-  <a href="#" target="_blank">
+  <a href="https://aria-qie.vercel.app/marketplace" target="_blank">
     <img src="https://img.shields.io/badge/Launch-Live%20dApp-5546ff?style=for-the-badge&logo=vercel" alt="Live">
   </a>
 </p>
@@ -292,7 +292,7 @@ Users see clear visual confirmation of their selection and understand exactly wh
   - Upload time: `1:43:51 PM`
 - **"Change File" button** for easy file switching
 - Blue info box explaining the AI pipeline:
-  - 🤖 Gemini AI Processing
+  - 🤖 Groq AI Processing
   - 📸 QR Verification
   - 🔗 IPFS Upload
   - ⛓️ Blockchain Minting
@@ -392,7 +392,7 @@ All key information automatically extracted:
 
 - Permanent, decentralized storage confirmation
 - Link to view full metadata on IPFS
-- Badges: 🤖 Gemini 2.5 Pro | ⚡ QIE Blockchain | 🔗 IPFS Stored
+- Badges: 🤖 Groq Llama 3.3 | ⚡ QIE Blockchain | 🔗 IPFS Stored
 
 **Technical Achievement:**
 This comprehensive report demonstrates:
@@ -891,7 +891,7 @@ This architecture demonstrates a **fully functional, self-hosted oracle network*
 - MetaMask or QIE Wallet
 
 # Required API Keys (free tier available)
-- Gemini API Key (https://ai.google.dev/)
+- Groq API Key (https://console.groq.com/)
 - Pinata API Keys (https://pinata.cloud/)
 ```
 
@@ -921,7 +921,7 @@ cp .env.example .env
 nano .env  # Edit with your API keys
 
 # Required .env variables:
-# GEMINI_API_KEY=your_gemini_key
+# GROQ_API_KEY=your_groq_key
 # PINATA_API_KEY=your_pinata_key
 # PINATA_SECRET_API_KEY=your_pinata_secret
 # SERVER_WALLET_PRIVATE_KEY=your_wallet_private_key
@@ -1042,7 +1042,7 @@ Frontend will start on `http://localhost:5173`
 | ------------------------ | ------------------------------------------ | ------------------ | ------------- |
 | Document Types Supported | **8+**                                     | 1–2                | 2–3           |
 | Verification Speed       | **<3 seconds**                             | 3–7 days           | Hours         |
-| AI Model                 | **Gemini 2.5 Pro (RWA-tuned)**             | GPT-3.5            | Custom        |
+| AI Model                 | **Groq Llama 3.3 (RWA-tuned)**             | GPT-3.5            | Custom        |
 | QR Verification Layer    | **✅ Yes (Dual verification)**             | ❌ No              | ❌ No         |
 | Pricing Model            | **Static ARIA + USD-Pegged (Oracle)**      | Static Crypto only | Static Crypto |
 | Live Price Oracle        | **✅ Yes (Plug-and-Play for QIE Oracles)** | ❌ No              | ❌ No         |
@@ -1226,7 +1226,7 @@ npm run test:e2e
 **Themes Covered**:
 
 - ✅ NFTs Beyond Art (Primary) - RWA tokenization
-- ✅ AI x Blockchain (Primary) - Gemini AI verification
+- ✅ AI x Blockchain (Primary) - Groq AI verification
 - ✅ Identity & Security - Document authentication
 - ✅ Tokenization for All - Multi-document support
 - ✅ Oracles & Real-World Data - (Coming in Week 2)
@@ -1341,7 +1341,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 Special thanks to:
 
 - **QIE Blockchain Team** - For the amazing hackathon & support
-- **Google Gemini** - For powerful AI capabilities
+- **Groq** - For lightning-fast AI inference
 - **Pinata** - For reliable IPFS infrastructure
 - **OpenZeppelin** - For secure smart contract libraries
 - **Chakra UI** - For beautiful components
