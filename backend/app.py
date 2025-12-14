@@ -477,7 +477,8 @@ def get_nft_live_price(token_id):
                 name,
                 use_dynamic,
                 price_pair,
-                price_in_usd_e8
+                price_in_usd_e8,
+                disputed
             ) = listing_details
 
             static_price_tokens = static_price_wei / 1e18
