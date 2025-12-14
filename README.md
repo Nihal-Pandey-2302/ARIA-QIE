@@ -594,6 +594,9 @@ This dashboard ensures the **dynamic pricing engine is stable, reliable, and pro
 
 ---
 
+<details>
+<summary><strong>🆕 Latest Features (Week 2 Update)</strong></summary>
+
 ## 🆕 Latest Features (Week 2 Update)
 
 ### 1. Oracle-Powered Hybrid Pricing (NEW)
@@ -748,6 +751,8 @@ A.R.I.A. doesn’t just mint NFTs — it creates a **closed, self-sustaining RWA
 - **IPFS Persistence** — tamper-proof metadata & verification records
 - **Modular Smart Contracts** — gas-optimized, secure, flexible architecture
 - **Live Data Streams** — WebSocket-based TX tracking and oracle pricing
+
+</details>
 
 ---
 
@@ -1191,10 +1196,10 @@ npm run test:e2e
 ### **Speed**
 
 - Document Upload: **<1 second**
-- AI Analysis: **50-100 seconds**
+- AI Analysis: **10-15 seconds**
 - IPFS Upload: **10-15 seconds**
 - NFT Minting: **10-15 seconds** (QIE finality)
-- **Total Time**: **<5 minutes** start to finish
+- **Total Time**: **<1 minute** start to finish
 
 ### **Accuracy**
 
@@ -1213,42 +1218,6 @@ npm run test:e2e
 </details>
 
 ---
-
-<details>
-<summary><strong>🏆 Hackathon Submission Details</strong></summary>
-
-## 🏆 Hackathon Submission Details
-
-### **QIE Blockchain Hackathon 2025**
-
-**Category**: NFTs Beyond Art + AI x Blockchain
-
-**Themes Covered**:
-
-- ✅ NFTs Beyond Art (Primary) - RWA tokenization
-- ✅ AI x Blockchain (Primary) - Groq AI verification
-- ✅ Identity & Security - Document authentication
-- ✅ Tokenization for All - Multi-document support
-- ✅ Oracles & Real-World Data - (Coming in Week 2)
-
-**Bonus Integrations**:
-
-- ✅ QIEDEX Token Creator (In Progress - Week 2)
-- 🔄 QIE Oracles Integration (Planned - Week 3)
-- ✅ QIE Blockchain Deployment
-
-**Team**: Solo Developer - Nihal Pandey
-
-**Development Timeline**:
-
-- Week 1: Multi-document support, focused AI analysis ✅
-- Week 2: Custom naming, IPFS transparency, QIEDEX fractionalization ✅
-- Week 3: QIE oracle integration 📅
-- Week 4: QIE mainnet deployment 📅
-- Week 5: Documentation & polish 📅
-- Week 6: Demo video & submission 📅
-
-</details>
 
 ---
 
@@ -1307,73 +1276,3 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 </details>
 
 ---
-
-<details>
-<summary><strong>👨‍💻 Author & Contact</strong></summary>
-
-## 👨‍💻 Author & Contact
-
-**Nihal Pandey** - Solo Developer & Blockchain Enthusiast
-
-### **Connect With Me**
-
-- 💼 LinkedIn: [nihal-pandey-8529b6257](https://www.linkedin.com/in/nihal-pandey-8529b6257/)
-- 🐦 X (Twitter): [@PandeyNihal23](https://x.com/PandeyNihal23)
-- 💻 GitHub: [@Nihal-Pandey-2302](https://github.com/Nihal-Pandey-2302)
-- 📧 Email: <pandeynihal232@gmail.com>
-
-### **Project Links**
-
-- 📦 Repository: [ARIA-ON-QIE](https://github.com/Nihal-Pandey-2302/ARIA-ON-QIE)
-- 🌐 Live Demo: [Coming Soon]
-- 🎥 Video Demo: [Coming Soon]
-- 📚 Documentation: [In This README]
-
-</details>
-
----
-
-<details>
-<summary><strong>🙏 Acknowledgments</strong></summary>
-
-## 🙏 Acknowledgments
-
-Special thanks to:
-
-- **QIE Blockchain Team** - For the amazing hackathon & support
-- **Groq** - For lightning-fast AI inference
-- **Pinata** - For reliable IPFS infrastructure
-- **OpenZeppelin** - For secure smart contract libraries
-- **Chakra UI** - For beautiful components
-
-</details>
-
----
-
-<p align="center">
-  <strong>Built for the QIE Blockchain Hackathon 2025</strong><br>
-  <em>Democratizing RWA Verification, One Document at a Time</em>
-</p>
-
----
-
-<details>
-<summary><strong>🔥 Quick Stats</strong></summary>
-
-## 🔥 Quick Stats
-
-- ⚡ **25,000+ TPS** on QIE Blockchain
-- 🤖 **8+ Document Types** AI-verified
-- 💰 **$0.10 Cost** per verification
-- ⏱️ **< 3 Seconds** mint time
-- 🌍 **100% Decentralized** storage (IPFS)
-- 🔥 **80% Gas Burn** deflationary
-- 📊 **Live Oracles** dynamic pricing
-
-</details>
-
----
-
-**Star ⭐ this repo if you find it useful!**
-
-**#QIEHackathon2025 #RWA #AI #Blockchain #DeFi #NFTs**
